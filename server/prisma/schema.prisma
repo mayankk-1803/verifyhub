@@ -1,0 +1,609 @@
+datasource db {
+  provider = "mysql"
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// 1. Role
+model Role {
+  id           Int           @id @default(autoincrement())
+  name         String        @unique
+  description  String?
+  createdAt    DateTime      @default(now()) @map("createdAt")
+  updatedAt    DateTime      @updatedAt @map("updatedAt")
+  users        User[]
+  pricingRules PricingRule[]
+
+  @@map("roles")
+}
+
+// 2. Organization
+model Organization {
+  id                   Int                   @id @default(autoincrement())
+  name                 String
+  tenantId             String                @unique @map("tenant_id")
+  status               OrganizationStatus    @default(ACTIVE)
+  deletedAt            DateTime?             @map("deleted_at")
+  createdAt            DateTime              @default(now()) @map("created_at")
+  updatedAt            DateTime              @updatedAt @map("updated_at")
+  users                User[]
+  wallets              Wallet[]
+  apiKeys              ApiKey[]
+  verificationRequests VerificationRequest[]
+  webhooks             Webhook[]
+  auditLogs            AuditLog[]
+  teams                Team[]
+  invoices             Invoice[]
+
+  @@map("organizations")
+}
+
+enum OrganizationStatus {
+  ACTIVE
+  SUSPENDED
+  PENDING
+}
+
+// 3. User
+model User {
+  id                   Int                   @id @default(autoincrement())
+  name                 String?
+  email                String?               @unique
+  password             String?
+  phone                String?               @unique
+  phoneVerified        Boolean               @default(false) @map("phone_verified")
+  lastLogin            DateTime?             @map("last_login")
+  lastIp               String?               @map("last_ip")
+  isAdmin              Boolean               @default(false) @map("is_admin")
+  roleId               Int                   @map("role_id")
+  role                 Role                  @relation(fields: [roleId], references: [id])
+  organizationId       Int?                  @map("organization_id")
+  organization         Organization?         @relation(fields: [organizationId], references: [id])
+  status               UserStatus            @default(ACTIVE)
+  verified             Boolean               @default(false)
+  refreshToken         String?               @map("refresh_token") @db.Text
+  resetToken           String?               @map("reset_token")
+  resetExpires         DateTime?             @map("reset_expires")
+  deletedAt            DateTime?             @map("deleted_at")
+  createdAt            DateTime              @default(now()) @map("created_at")
+  updatedAt            DateTime              @updatedAt @map("updated_at")
+  wallet               Wallet?
+  apiKeys              ApiKey[]
+  verificationRequests VerificationRequest[]
+  webhooks             Webhook[]
+  supportTickets       SupportTicket[]
+  auditLogs            AuditLog[]
+  teamMembers          TeamMember[]
+  invoices             Invoice[]
+  notifications        Notification[]
+  apiUsageAnalytics    ApiUsageAnalytics[]
+  pricingRules         PricingRule[]
+  subscriptions        UserServiceSubscription[]
+  kycVerifications     KycVerification[]
+
+  kycStatus            String                @default("PENDING_KYC") @map("kyc_status")
+  panNumber            String?               @map("pan_number")
+  aadhaarNumberMasked  String?               @map("aadhaar_number_masked")
+  panVerified          Boolean               @default(false) @map("pan_verified")
+  aadhaarVerified      Boolean               @default(false) @map("aadhaar_verified")
+  panName              String?               @map("pan_name")
+  dateOfBirth          String?               @map("date_of_birth")
+  panVerifiedAt        DateTime?             @map("pan_verified_at")
+  aadhaarVerifiedAt    DateTime?             @map("aadhaar_verified_at")
+  kycApprovedAt        DateTime?             @map("kyc_approved_at")
+  kycRejectedAt        DateTime?             @map("kyc_rejected_at")
+  kycRemarks           String?               @map("kyc_remarks")
+  kycLevel             String                @default("PENDING_KYC") @map("kyc_level")
+  aadhaarName          String?               @map("aadhaar_name")
+  aadhaarDob           String?               @map("aadhaar_dob")
+  aadhaarGender        String?               @map("aadhaar_gender")
+  aadhaarFatherName    String?               @map("aadhaar_father_name")
+  aadhaarAddress       String?               @map("aadhaar_address")
+  aadhaarDistrict      String?               @map("aadhaar_district")
+  aadhaarState         String?               @map("aadhaar_state")
+  aadhaarPincode       String?               @map("aadhaar_pincode")
+  aadhaarVillage       String?               @map("aadhaar_village")
+  aadhaarCountry       String?               @map("aadhaar_country")
+  aadhaarPhoto         String?               @db.LongText @map("aadhaar_photo")
+  aadhaarPhotoUrl      String?               @map("aadhaar_photo_url")
+  phoneNumber          String?               @map("phone_number")
+
+
+  @@index([kycStatus])
+  @@index([panNumber])
+  @@index([phoneNumber])
+  @@index([aadhaarNumberMasked])
+  @@index([aadhaarVerifiedAt])
+  @@index([kycApprovedAt])
+  @@map("users")
+}
+
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+}
+
+// 4. Wallet
+model Wallet {
+  id              Int            @id @default(autoincrement())
+  userId          Int            @unique @map("user_id")
+  user            User           @relation(fields: [userId], references: [id])
+  organizationId  Int?           @map("organization_id")
+  organization    Organization?  @relation(fields: [organizationId], references: [id])
+  balance         Decimal        @default(0.0000) @db.Decimal(15, 4)
+  currency        String         @default("INR") @db.VarChar(3)
+  lastRechargedAt DateTime?      @map("last_recharged_at")
+  createdAt       DateTime       @default(now()) @map("created_at")
+  updatedAt       DateTime       @updatedAt @map("updated_at")
+  transactions    WalletLedger[]
+
+  @@index([userId])
+  @@map("wallets")
+}
+
+// 5. WalletLedger
+model WalletLedger {
+  id            Int                  @id @default(autoincrement())
+  walletId      Int                  @map("wallet_id")
+  wallet        Wallet               @relation(fields: [walletId], references: [id])
+  type          WalletLedgerType
+  amount        Decimal              @db.Decimal(15, 4)
+  balanceAfter  Decimal              @map("balance_after") @db.Decimal(15, 4)
+  referenceId   String?              @map("reference_id")
+  referenceType LedgerReferenceType? @map("reference_type")
+  description   String?
+  status        WalletLedgerStatus   @default(COMPLETED)
+  createdAt     DateTime             @default(now()) @map("created_at")
+  updatedAt     DateTime             @updatedAt @map("updated_at")
+  payment       Payment?
+
+  @@map("wallet_ledger")
+}
+
+enum WalletLedgerType {
+  CREDIT
+  DEBIT
+  ADJUSTMENT
+}
+
+enum WalletLedgerStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  REVERSED
+}
+
+enum LedgerReferenceType {
+  PAYMENT
+  VERIFICATION
+  REFUND
+  MANUAL_CREDIT
+  MANUAL_DEBIT
+  SERVICE_PURCHASE
+  SERVICE_ACTIVATION
+  MANUAL_ADMIN_ADJUSTMENT
+}
+
+// 6. ApiKey
+model ApiKey {
+  id                   Int                   @id @default(autoincrement())
+  keyHash              String                @unique @map("key_hash")
+  keyMasked            String                @map("key_masked")
+  name                 String
+  userId               Int                   @map("user_id")
+  user                 User                  @relation(fields: [userId], references: [id])
+  organizationId       Int?                  @map("organization_id")
+  organization         Organization?         @relation(fields: [organizationId], references: [id])
+  rateLimit            Int                   @default(60) @map("rate_limit")
+  usageLimit           Int?                  @map("usage_limit")
+  usageCount           Int                   @default(0) @map("usage_count")
+  ipWhitelist          Json?                 @map("ip_whitelist")
+  permissions          Json?
+  status               ApiKeyStatus          @default(ACTIVE)
+  deletedAt            DateTime?             @map("deleted_at")
+  createdAt            DateTime              @default(now()) @map("created_at")
+  updatedAt            DateTime              @updatedAt @map("updated_at")
+  verificationRequests VerificationRequest[]
+  apiUsageAnalytics  ApiUsageAnalytics[]
+
+  @@index([userId])
+  @@index([status])
+  @@map("api_keys")
+}
+
+enum ApiKeyStatus {
+  ACTIVE
+  REVOKED
+}
+
+// 7. Service
+model Service {
+  id          Int       @id @default(autoincrement())
+  key         String    @unique
+  name        String
+  category    String
+  method      String
+  endpoint    String
+  description String?   @db.Text
+  successRate String?   @map("success_rate")
+  latency     String?
+  price       String?
+  activationFee Decimal @default(49.0000) @map("activation_fee") @db.Decimal(10, 4)
+  deletedAt   DateTime? @map("deleted_at")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+  subscriptions UserServiceSubscription[]
+
+  @@map("services")
+}
+
+// 8. Provider
+model Provider {
+  id                   Int                   @id @default(autoincrement())
+  name                 String
+  code                 String                @unique
+  activeStatus         Boolean               @default(true) @map("active_status")
+  apiBaseUrl           String?               @map("api_base_url")
+  credentials          Json?
+  createdAt            DateTime              @default(now()) @map("created_at")
+  updatedAt            DateTime              @updatedAt @map("updated_at")
+  verificationRequests VerificationRequest[]
+  primaryRoutes        ProviderRoute[]       @relation("PrimaryProvider")
+  backupRoutes         ProviderRoute[]       @relation("BackupProvider")
+
+  @@map("providers")
+}
+
+// 9. ProviderRoute
+model ProviderRoute {
+  id                Int      @id @default(autoincrement())
+  serviceType       String   @unique @map("service_type")
+  primaryProviderId Int      @map("primary_provider_id")
+  primaryProvider   Provider @relation("PrimaryProvider", fields: [primaryProviderId], references: [id])
+  backupProviderId  Int?     @map("backup_provider_id")
+  backupProvider    Provider? @relation("BackupProvider", fields: [backupProviderId], references: [id])
+  activeStatus      Boolean  @default(true) @map("active_status")
+  createdAt         DateTime @default(now()) @map("created_at")
+  updatedAt         DateTime @updatedAt @map("updated_at")
+
+  @@map("provider_routes")
+}
+
+// 10. VerificationRequest
+model VerificationRequest {
+  id             String                @id @default(uuid())
+  apiKeyId       Int?                  @map("api_key_id")
+  apiKey         ApiKey?               @relation(fields: [apiKeyId], references: [id])
+  userId         Int                   @map("user_id")
+  user           User                  @relation(fields: [userId], references: [id])
+  organizationId Int?                  @map("organization_id")
+  organization   Organization?         @relation(fields: [organizationId], references: [id])
+  serviceType    String                @map("service_type")
+  status         VerificationStatus    @default(PENDING)
+  providerId     Int?                  @map("provider_id")
+  provider       Provider?             @relation(fields: [providerId], references: [id])
+  cost           Decimal               @default(0.0000) @db.Decimal(10, 4)
+  payload        Json
+  ipAddress      String?               @map("ip_address")
+  createdAt      DateTime              @default(now()) @map("created_at")
+  updatedAt      DateTime              @updatedAt @map("updated_at")
+  response       VerificationResponse?
+
+  @@index([userId])
+  @@index([serviceType])
+  @@index([status])
+  @@index([createdAt])
+  @@map("verification_requests")
+}
+
+enum VerificationStatus {
+  PENDING
+  PROCESSING
+  SUCCESS
+  FAILED
+  REVERSED
+}
+
+// 11. VerificationResponse
+model VerificationResponse {
+  id                    Int                 @id @default(autoincrement())
+  verificationRequestId String              @unique @map("verification_request_id")
+  verificationRequest   VerificationRequest @relation(fields: [verificationRequestId], references: [id], onDelete: Cascade)
+  responseData          Json?               @map("response_data")
+  providerLatencyMs     Int?                @map("provider_latency_ms")
+  errorCode             String?             @map("error_code")
+  errorMessage          String?             @db.Text @map("error_message")
+  createdAt             DateTime            @default(now()) @map("created_at")
+  updatedAt             DateTime            @updatedAt @map("updated_at")
+
+  @@map("verification_responses")
+}
+
+// 12. Webhook
+model Webhook {
+  id             Int               @id @default(autoincrement())
+  userId         Int               @map("user_id")
+  user           User              @relation(fields: [userId], references: [id])
+  organizationId Int?              @map("organization_id")
+  organization   Organization?     @relation(fields: [organizationId], references: [id])
+  url            String
+  secretKey      String            @map("secret_key")
+  activeStatus   Boolean           @default(true) @map("active_status")
+  events         Json?
+  deletedAt      DateTime?         @map("deleted_at")
+  createdAt      DateTime          @default(now()) @map("created_at")
+  updatedAt      DateTime          @updatedAt @map("updated_at")
+  deliveries     WebhookDelivery[]
+
+  @@index([userId])
+  @@map("webhooks")
+}
+
+// 13. WebhookDelivery
+model WebhookDelivery {
+  id            Int      @id @default(autoincrement())
+  webhookId     Int      @map("webhook_id")
+  webhook       Webhook  @relation(fields: [webhookId], references: [id], onDelete: Cascade)
+  eventType     String   @map("event_type")
+  payload       Json
+  statusCode    Int?     @map("status_code")
+  responseBody  String?  @db.Text @map("response_body")
+  success       Boolean  @default(false)
+  attemptNumber Int      @default(1) @map("attempt_number")
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  @@map("webhook_deliveries")
+}
+
+// 14. SupportTicket
+model SupportTicket {
+  id          Int                 @id @default(autoincrement())
+  userId      Int                 @map("user_id")
+  user        User                @relation(fields: [userId], references: [id])
+  subject     String
+  description String              @db.Text
+  priority    SupportPriority     @default(MEDIUM)
+  status      SupportTicketStatus @default(OPEN)
+  category    String?
+  createdAt   DateTime            @default(now()) @map("created_at")
+  updatedAt   DateTime            @updatedAt @map("updated_at")
+
+  @@index([userId])
+  @@index([status])
+  @@map("support_tickets")
+}
+
+enum SupportPriority {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum SupportTicketStatus {
+  OPEN
+  IN_PROGRESS
+  RESOLVED
+  CLOSED
+}
+
+// 15. AuditLog
+model AuditLog {
+  id             Int           @id @default(autoincrement())
+  userId         Int?          @map("user_id")
+  user           User?         @relation(fields: [userId], references: [id])
+  organizationId Int?          @map("organization_id")
+  organization   Organization? @relation(fields: [organizationId], references: [id])
+  action         String
+  entityName     String?       @map("entity_name")
+  entityId       String?       @map("entity_id")
+  oldValues      Json?         @map("old_values")
+  newValues      Json?         @map("new_values")
+  ipAddress      String?       @map("ip_address")
+  userAgent      String?       @map("user_agent")
+  createdAt      DateTime      @default(now()) @map("created_at")
+  updatedAt      DateTime      @updatedAt @map("updated_at")
+
+  @@index([userId])
+  @@index([organizationId])
+  @@map("audit_logs")
+}
+
+// 16. Team
+model Team {
+  id             Int          @id @default(autoincrement())
+  organizationId Int          @map("organization_id")
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  name           String
+  createdAt      DateTime     @default(now()) @map("created_at")
+  updatedAt      DateTime     @updatedAt @map("updated_at")
+  members        TeamMember[]
+
+  @@map("teams")
+}
+
+// 17. TeamMember
+model TeamMember {
+  id        Int            @id @default(autoincrement())
+  teamId    Int            @map("team_id")
+  team      Team           @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  userId    Int            @map("user_id")
+  user      User           @relation(fields: [userId], references: [id])
+  role      TeamMemberRole @default(MEMBER)
+  createdAt DateTime       @default(now()) @map("created_at")
+  updatedAt DateTime       @updatedAt @map("updated_at")
+
+  @@map("team_members")
+}
+
+enum TeamMemberRole {
+  OWNER
+  ADMIN
+  MEMBER
+}
+
+// 18. Payment
+model Payment {
+  id                  Int           @id @default(autoincrement())
+  walletTransactionId Int?          @unique @map("wallet_transaction_id")
+  walletTransaction   WalletLedger? @relation(fields: [walletTransactionId], references: [id])
+  razorpayOrderId     String?       @map("razorpay_order_id")
+  razorpayPaymentId   String?       @map("razorpay_payment_id")
+  razorpaySignature   String?       @map("razorpay_signature")
+  amount              Decimal       @db.Decimal(15, 4)
+  status              PaymentStatus @default(PENDING)
+  createdAt           DateTime      @default(now()) @map("created_at")
+  updatedAt           DateTime      @updatedAt @map("updated_at")
+  invoice             Invoice?
+
+  @@map("payments")
+}
+
+enum PaymentStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  REFUNDED
+}
+
+// 19. Invoice
+model Invoice {
+  id             Int           @id @default(autoincrement())
+  userId         Int           @map("user_id")
+  user           User          @relation(fields: [userId], references: [id])
+  organizationId Int?          @map("organization_id")
+  organization   Organization? @relation(fields: [organizationId], references: [id])
+  paymentId      Int?          @unique @map("payment_id")
+  payment        Payment?      @relation(fields: [paymentId], references: [id])
+  invoiceNumber  String        @unique @map("invoice_number")
+  amount         Decimal       @db.Decimal(15, 4)
+  fileUrl        String?       @map("file_url")
+  billingDetails Json?         @map("billing_details")
+  createdAt      DateTime      @default(now()) @map("created_at")
+  updatedAt      DateTime      @updatedAt @map("updated_at")
+
+  @@map("invoices")
+}
+
+// 20. PricingRule
+model PricingRule {
+  id           Int      @id @default(autoincrement())
+  serviceType  String   @map("service_type")
+  roleId       Int?     @map("role_id")
+  role         Role?    @relation(fields: [roleId], references: [id])
+  userId       Int?     @map("user_id")
+  user         User?    @relation(fields: [userId], references: [id])
+  providerCost Decimal  @map("provider_cost") @db.Decimal(10, 4)
+  sellingPrice Decimal  @map("selling_price") @db.Decimal(10, 4)
+  margin       Decimal  @db.Decimal(10, 4)
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  @@index([serviceType])
+  @@map("pricing_rules")
+}
+
+// 21. ApiUsageAnalytics
+model ApiUsageAnalytics {
+  id          Int      @id @default(autoincrement())
+  apiKeyId    Int?     @map("api_key_id")
+  apiKey      ApiKey?  @relation(fields: [apiKeyId], references: [id])
+  userId      Int?     @map("user_id")
+  user        User?    @relation(fields: [userId], references: [id])
+  serviceType String   @map("service_type")
+  statusCode  Int      @map("status_code")
+  latencyMs   Int      @map("latency_ms")
+  ipAddress   String?  @map("ip_address")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@index([apiKeyId])
+  @@index([userId])
+  @@index([serviceType])
+  @@index([createdAt])
+  @@map("api_usage_analytics")
+}
+
+// 22. Notification
+model Notification {
+  id        Int      @id @default(autoincrement())
+  userId    Int      @map("user_id")
+  user      User     @relation(fields: [userId], references: [id])
+  title     String
+  message   String   @db.Text
+  isRead    Boolean  @default(false) @map("is_read")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("notifications")
+}
+
+// 23. SystemSetting
+model SystemSetting {
+  id          Int      @id @default(autoincrement())
+  key         String   @unique
+  value       String   @db.Text
+  description String?
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@map("system_settings")
+}
+
+// 24. UserServiceSubscription
+model UserServiceSubscription {
+  id             Int       @id @default(autoincrement())
+  userId         Int       @map("user_id")
+  serviceId      Int       @map("service_id")
+  user           User      @relation(fields: [userId], references: [id])
+  service        Service   @relation(fields: [serviceId], references: [id])
+  status         String    @default("ACTIVE")
+  purchaseAmount Decimal   @map("purchase_amount") @db.Decimal(10, 4)
+  activatedAt    DateTime  @default(now()) @map("activated_at")
+  expiresAt      DateTime? @map("expires_at")
+  paymentId      String?   @map("payment_id")
+  createdAt      DateTime  @default(now()) @map("created_at")
+  updatedAt      DateTime  @updatedAt @map("updated_at")
+
+  @@unique([userId, serviceId])
+  @@index([userId])
+  @@index([serviceId])
+  @@map("user_service_subscriptions")
+}
+
+// 25. Otp
+model Otp {
+  id        Int      @id @default(autoincrement())
+  phone     String   @unique
+  otpHash   String   @map("otp_hash")
+  expiresAt DateTime @map("expires_at")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([phone])
+  @@map("otps")
+}
+
+// 26. KycVerification
+model KycVerification {
+  id                Int      @id @default(autoincrement())
+  userId            Int      @map("user_id")
+  user              User     @relation(fields: [userId], references: [id])
+  panNumber         String?  @map("pan_number")
+  aadhaarMasked     String?  @map("aadhaar_masked")
+  applicationNumber String?  @map("application_number")
+  panResponse       Json?    @map("pan_response")
+  aadhaarResponse   Json?    @map("aadhaar_response")
+  status            String
+  createdAt         DateTime @default(now()) @map("created_at")
+  updatedAt         DateTime @updatedAt @map("updated_at")
+
+  @@index([userId])
+  @@index([status])
+  @@index([createdAt])
+  @@map("kyc_verifications")
+}
+

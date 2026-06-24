@@ -1,0 +1,2238 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Dizipay API Marketplace",
+    "description": "Production-ready Verification API Gateway endpoints for identity, taxes, and corporate registries.",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://authserver.dizipay.in/api/v1",
+      "description": "Production API Gateway server"
+    }
+  ],
+  "paths": {
+    "/gst/verify": {
+      "get": {
+        "summary": "GST Verification",
+        "description": "Verify corporate GSTIN tax filings, status, legal name, and registered addresses.",
+        "tags": [
+          "KYC Verification"
+        ],
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "api_key",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "vh_live_xxxxxxxxxxxx"
+            },
+            "description": "API key for gateway authentication"
+          },
+          {
+            "name": "gst",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "Enter GST Number"
+            },
+            "description": "Corporate GSTIN"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful verification details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "example": {
+                    "success": true,
+                    "requestId": "req_gst123",
+                    "serviceType": "GST_VERIFY",
+                    "latencyMs": 195,
+                    "provider": "karza",
+                    "data": {
+                      "gstin": "29AACCF1132H2ZX",
+                      "legalName": "DIZIPAY SOLUTIONS PRIVATE LIMITED",
+                      "registrationDate": "2023-05-12",
+                      "constitutionOfBusiness": "Private Limited Company",
+                      "gstinStatus": "ACTIVE",
+                      "address": "PLOT NO. 45, HIGHTECH CITY, HYDERABAD, TELANGANA, 500081"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized or invalid API Key"
+          },
+          "403": {
+            "description": "Insufficient wallet balance or scope"
+          },
+          "429": {
+            "description": "Too many requests - Rate limit exceeded"
+          },
+          "502": {
+            "description": "Provider communication failure"
+          }
+        }
+      }
+    },
+    "/pan/verify": {
+      "get": {
+        "summary": "PAN Verification",
+        "description": "Verify PAN card details against national database and fetch matching holder name.",
+        "tags": [
+          "KYC Verification"
+        ],
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "api_key",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "vh_live_xxxxxxxxxxxx"
+            },
+            "description": "API key for gateway authentication"
+          },
+          {
+            "name": "pan_number",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "Enter PAN Number"
+            },
+            "description": "PAN Card Number"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful verification details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "example": {
+                    "success": true,
+                    "requestId": "req_pan123",
+                    "serviceType": "PAN_CARD",
+                    "latencyMs": 135,
+                    "provider": "surepass",
+                    "data": {
+                      "pan": "ABCDE1234F",
+                      "name": "MAYANK KUMAR SHARMA",
+                      "firstName": "MAYANK",
+                      "middleName": "KUMAR",
+                      "lastName": "SHARMA",
+                      "category": "INDIVIDUAL",
+                      "gender": "MALE",
+                      "dateOfBirth": "1998-03-18",
+                      "aadhaarLinked": true,
+                      "status": "VALID",
+                      "message": "PAN Card exists and is active."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized or invalid API Key"
+          },
+          "403": {
+            "description": "Insufficient wallet balance or scope"
+          },
+          "429": {
+            "description": "Too many requests - Rate limit exceeded"
+          },
+          "502": {
+            "description": "Provider communication failure"
+          }
+        }
+      }
+    },
+    "/pan-basic/verify": {
+      "get": {
+        "summary": "PAN Basic",
+        "description": "Check active status and basic validation metrics on PAN database records.",
+        "tags": [
+          "KYC Verification"
+        ],
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "api_key",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "vh_live_xxxxxxxxxxxx"
+            },
+            "description": "API key for gateway authentication"
+          },
+          {
+            "name": "pan",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "Enter PAN Number"
+            },
+            "description": "PAN Card Number"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful verification details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "example": {
+                    "success": true,
+                    "requestId": "req_panbasic123",
+                    "serviceType": "PAN_BASIC",
+                    "latencyMs": 75,
+                    "provider": "surepass",
+                    "data": {
+                      "pan": "ABCDE1234F",
+                      "status": "VALID",
+                      "verifiedAt": "2023-11-10T12:00:00Z"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized or invalid API Key"
+          },
+          "403": {
+            "description": "Insufficient wallet balance or scope"
+          },
+          "429": {
+            "description": "Too many requests - Rate limit exceeded"
+          },
+          "502": {
+            "description": "Provider communication failure"
+          }
+        }
+      }
+    },
+    "/pan-verification/verify": {
+      "get": {
+        "summary": "PAN Verification Advanced",
+        "description": "Execute standard validation checks on a PAN card for corporate compliance audits.",
+        "tags": [
+          "KYC Verification"
+        ],
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "api_key",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "vh_live_xxxxxxxxxxxx"
+            },
+            "description": "API key for gateway authentication"
+          },
+          {
+            "name": "pan_no",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "Enter PAN Number"
+            },
+            "description": "PAN Card Number"
+          },
+          {
+            "name": "application_no",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "example": "Enter Application Number"
+            },
+            "description": "Application Number"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful verification details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "example": {
+                    "success": true,
+                    "requestId": "req_panverify123",
+                    "serviceType": "PAN_VERIFICATION",
+                    "latencyMs": 140,
+                    "provider": "surepass",
+                    "data": {
+                      "pan": "ABCDE1234F",
+                      "status": "VALID",
+                      "name": "MAYANK KUMAR SHARMA",
+                      "category": "INDIVIDUAL",
+                      "verifiedAt": "2023-11-10T12:00:00Z"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized or invalid API Key"
+          },
+          "403": {
+            "description": "Insufficient wallet balance or scope"
+          },
+          "429": {
+            "description": "Too many requests - Rate limit exceeded"
+          },
+          "502": {
+            "description": "Provider communication failure"
+          }
+        }
+      }
+    },
+    "/pan-decode/verify": {
+      "get": {
+        "summary": "PAN Decode",
+        "description": "Decode detailed registries for cardholder category, issuing authority, and profile logs.",
+        "tags": [
+          "KYC Verification"
+        ],
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "api_key",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "vh_live_xxxxxxxxxxxx"
+            },
+            "description": "API key for gateway authentication"
+          },
+          {
+            "name": "encData",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "Enter Encoded Data"
+            },
+            "description": "Encoded Data"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful verification details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "example": {
+                    "success": true,
+                    "requestId": "req_pandecode123",
+                    "serviceType": "PAN_DECODE",
+                    "latencyMs": 115,
+                    "provider": "surepass",
+                    "data": {
+                      "pan": "ABCDE1234F",
+                      "category": "INDIVIDUAL",
+                      "issuingAuthority": "UTI/ITD",
+                      "status": "VALID",
+                      "verifiedAt": "2023-11-10T12:00:00Z"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized or invalid API Key"
+          },
+          "403": {
+            "description": "Insufficient wallet balance or scope"
+          },
+          "429": {
+            "description": "Too many requests - Rate limit exceeded"
+          },
+          "502": {
+            "description": "Provider communication failure"
+          }
+        }
+      }
+    },
+    "/pancard_status": {
+      "get": {
+        "summary": "PAN Track",
+        "description": "Track dispatch, processing status, and SpeedPost AWB details of PAN card applications.",
+        "tags": [
+          "KYC Verification"
+        ],
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "api_key",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "vh_live_xxxxxxxxxxxx"
+            },
+            "description": "API key for gateway authentication"
+          },
+          {
+            "name": "application_no",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "Enter Application Number"
+            },
+            "description": "Application Number"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful verification details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "example": {
+                    "success": true,
+                    "requestId": "req_pantrack123",
+                    "serviceType": "PAN_TRACK",
+                    "latencyMs": 110,
+                    "provider": "surepass",
+                    "data": {
+                      "status": "DISPATCHED",
+                      "response_code": 200,
+                      "ack_no": "ACK881023947832",
+                      "message": "Your PAN card has been successfully processed and dispatched."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized or invalid API Key"
+          },
+          "403": {
+            "description": "Insufficient wallet balance or scope"
+          },
+          "429": {
+            "description": "Too many requests - Rate limit exceeded"
+          },
+          "502": {
+            "description": "Provider communication failure"
+          }
+        }
+      }
+    },
+    "/aadhaar-otp/verify": {
+      "get": {
+        "summary": "Aadhaar Demographics (OTP)",
+        "description": "Retrieve verified citizen demographics, address, and profile details using Aadhaar OTP verification.",
+        "tags": [
+          "KYC Verification"
+        ],
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "api_key",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "vh_live_xxxxxxxxxxxx"
+            },
+            "description": "API key for gateway authentication"
+          },
+          {
+            "name": "aadhaar_no",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "Enter Aadhaar Number"
+            },
+            "description": "Aadhaar Number"
+          },
+          {
+            "name": "otp",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "example": "Enter OTP"
+            },
+            "description": "One-Time Password (OTP)"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful verification details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "example": {
+                    "success": true,
+                    "requestId": "req_aadhaarotp123",
+                    "serviceType": "AADHAAR_OTP",
+                    "latencyMs": 290,
+                    "provider": "surepass",
+                    "data": {
+                      "fullName": "MAYANK KUMAR SHARMA",
+                      "gender": "MALE",
+                      "dateOfBirth": "1998-03-18",
+                      "address": "H.NO 42, SECTOR 5, JAIPUR, RAJASTHAN - 302015",
+                      "profileImage": "data:image/jpeg;base64,...",
+                      "verified": true
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized or invalid API Key"
+          },
+          "403": {
+            "description": "Insufficient wallet balance or scope"
+          },
+          "429": {
+            "description": "Too many requests - Rate limit exceeded"
+          },
+          "502": {
+            "description": "Provider communication failure"
+          }
+        }
+      }
+    },
+    "/aadhaar/verify": {
+      "get": {
+        "summary": "Aadhaar Data Verification",
+        "description": "Initiate Aadhaar card verification details directly with state gateways.",
+        "tags": [
+          "KYC Verification"
+        ],
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "api_key",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "vh_live_xxxxxxxxxxxx"
+            },
+            "description": "API key for gateway authentication"
+          },
+          {
+            "name": "aadhaar_no",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "Enter Aadhaar Number"
+            },
+            "description": "Aadhaar Number"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful verification details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "example": {
+                    "success": true,
+                    "requestId": "req_aadhaar123",
+                    "serviceType": "AADHAAR_DATA",
+                    "latencyMs": 245,
+                    "provider": "surepass",
+                    "data": {
+                      "transactionId": "tx_aadhaar_98765",
+                      "status": "VERIFIED",
+                      "message": "Aadhaar successfully verified."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized or invalid API Key"
+          },
+          "403": {
+            "description": "Insufficient wallet balance or scope"
+          },
+          "429": {
+            "description": "Too many requests - Rate limit exceeded"
+          },
+          "502": {
+            "description": "Provider communication failure"
+          }
+        }
+      }
+    },
+    "/aadhaar-pan/verify": {
+      "get": {
+        "summary": "Aadhaar to PAN Lookup v2",
+        "description": "Verify linked status and cross-match credentials between Aadhaar and PAN documents.",
+        "tags": [
+          "KYC Verification"
+        ],
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "api_key",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "vh_live_xxxxxxxxxxxx"
+            },
+            "description": "API key for gateway authentication"
+          },
+          {
+            "name": "aadhaar",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "Enter Aadhaar Number"
+            },
+            "description": "Aadhaar Number"
+          },
+          {
+            "name": "pan",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "Enter PAN Number"
+            },
+            "description": "PAN Card Number"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful verification details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "example": {
+                    "success": true,
+                    "requestId": "req_aadhaarpan2_123",
+                    "serviceType": "AADHAAR_TO_PAN",
+                    "latencyMs": 275,
+                    "provider": "surepass",
+                    "data": {
+                      "aadhaar": "123456789012",
+                      "pan": "ABCDE1234F",
+                      "linked": true,
+                      "nameMatch": true,
+                      "matchScore": 98.5
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized or invalid API Key"
+          },
+          "403": {
+            "description": "Insufficient wallet balance or scope"
+          },
+          "429": {
+            "description": "Too many requests - Rate limit exceeded"
+          },
+          "502": {
+            "description": "Provider communication failure"
+          }
+        }
+      }
+    },
+    "/ration-verify": {
+      "get": {
+        "summary": "Ration Verification",
+        "description": "Verify Ration card active status, scheme types, address, and family member details.",
+        "tags": [
+          "Verification APIs"
+        ],
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "api_key",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "vh_live_xxxxxxxxxxxx"
+            },
+            "description": "API key for gateway authentication"
+          },
+          {
+            "name": "ration",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "Enter Ration Card Number"
+            },
+            "description": "Ration Card Number"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful verification details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "example": {
+                    "success": true,
+                    "requestId": "req_ration123",
+                    "serviceType": "RATION",
+                    "latencyMs": 205,
+                    "provider": "signzy",
+                    "data": {
+                      "homeStateCode": "08",
+                      "districtCode": "115",
+                      "rcId": "123456789012",
+                      "homeStateName": "Rajasthan",
+                      "homeDistName": "Jaipur",
+                      "fpsId": "fps_jaipur_42",
+                      "schemeName": "Antyodaya Anna Yojana (AAY)",
+                      "address": "H.NO 42, SECTOR 5, JAIPUR, RAJASTHAN - 302015",
+                      "memberDetailsList": [
+                        {
+                          "name": "ASHOK KUMAR SHARMA",
+                          "relation": "HEAD",
+                          "age": 56
+                        },
+                        {
+                          "name": "SAROJ DEVI",
+                          "relation": "WIFE",
+                          "age": 50
+                        },
+                        {
+                          "name": "MAYANK SHARMA",
+                          "relation": "SON",
+                          "age": 28
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized or invalid API Key"
+          },
+          "403": {
+            "description": "Insufficient wallet balance or scope"
+          },
+          "429": {
+            "description": "Too many requests - Rate limit exceeded"
+          },
+          "502": {
+            "description": "Provider communication failure"
+          }
+        }
+      }
+    },
+    "/voter/verify": {
+      "get": {
+        "summary": "Voter Verification",
+        "description": "Validate voter card information directly from the Indian electoral database.",
+        "tags": [
+          "Verification APIs"
+        ],
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "api_key",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "vh_live_xxxxxxxxxxxx"
+            },
+            "description": "API key for gateway authentication"
+          },
+          {
+            "name": "epic",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "Enter Voter ID"
+            },
+            "description": "EPIC (Voter ID Number)"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful verification details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "example": {
+                    "success": true,
+                    "requestId": "req_voter123",
+                    "serviceType": "VOTER_VERIFY",
+                    "latencyMs": 145,
+                    "provider": "signzy",
+                    "data": {
+                      "epicNumber": "ABC1234567",
+                      "fullName": "MAYANK KUMAR SHARMA",
+                      "age": 28,
+                      "gender": "MALE",
+                      "stateName": "Rajasthan",
+                      "districtValue": "Jaipur",
+                      "relationName": "ASHOK KUMAR SHARMA",
+                      "dob": "1998-03-18",
+                      "address": "H.NO 42, SECTOR 5, JAIPUR, RAJASTHAN - 302015",
+                      "electorType": "GENERAL"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized or invalid API Key"
+          },
+          "403": {
+            "description": "Insufficient wallet balance or scope"
+          },
+          "429": {
+            "description": "Too many requests - Rate limit exceeded"
+          },
+          "502": {
+            "description": "Provider communication failure"
+          }
+        }
+      }
+    },
+    "/gst-return/verify": {
+      "get": {
+        "summary": "GST Return Filing Verification",
+        "description": "Track corporate GST filing status, returns schedule logs, and tax payment histories.",
+        "tags": [
+          "Verification APIs"
+        ],
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "api_key",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "vh_live_xxxxxxxxxxxx"
+            },
+            "description": "API key for gateway authentication"
+          },
+          {
+            "name": "gstin",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "Enter GST Number"
+            },
+            "description": "Corporate GSTIN"
+          },
+          {
+            "name": "financial_year",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "2023-24"
+            },
+            "description": "Financial Year"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful verification details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "example": {
+                    "success": true,
+                    "requestId": "req_gstret123",
+                    "serviceType": "GST_RETURN",
+                    "latencyMs": 210,
+                    "provider": "karza",
+                    "data": {
+                      "gstin": "29AACCF1132H2ZX",
+                      "financialYear": "2023-24",
+                      "filingStatus": "COMPLETED",
+                      "returns": [
+                        {
+                          "returnType": "GSTR-1",
+                          "status": "Filed",
+                          "dateOfFiling": "2023-11-10"
+                        },
+                        {
+                          "returnType": "GSTR-3B",
+                          "status": "Filed",
+                          "dateOfFiling": "2023-11-20"
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized or invalid API Key"
+          },
+          "403": {
+            "description": "Insufficient wallet balance or scope"
+          },
+          "429": {
+            "description": "Too many requests - Rate limit exceeded"
+          },
+          "502": {
+            "description": "Provider communication failure"
+          }
+        }
+      }
+    },
+    "/rc-verify/verify": {
+      "get": {
+        "summary": "RC Verification",
+        "description": "Verify registration details, owner profile, vehicle details, fitness, and insurance status.",
+        "tags": [
+          "Verification APIs"
+        ],
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "api_key",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "vh_live_xxxxxxxxxxxx"
+            },
+            "description": "API key for gateway authentication"
+          },
+          {
+            "name": "vehicle_no",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "Enter Vehicle Number"
+            },
+            "description": "Vehicle Number"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful verification details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "example": {
+                    "success": true,
+                    "requestId": "req_rcverify123",
+                    "serviceType": "RC_VERIFY",
+                    "latencyMs": 175,
+                    "provider": "surepass",
+                    "data": {
+                      "vehicleNo": "DL3CA1234",
+                      "ownerName": "MAYANK SHARMA",
+                      "makerModel": "MARUTI SWIFT",
+                      "registrationDate": "2020-05-15",
+                      "fitnessUpto": "2035-05-14",
+                      "insuranceUpto": "2025-05-14",
+                      "status": "ACTIVE"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized or invalid API Key"
+          },
+          "403": {
+            "description": "Insufficient wallet balance or scope"
+          },
+          "429": {
+            "description": "Too many requests - Rate limit exceeded"
+          },
+          "502": {
+            "description": "Provider communication failure"
+          }
+        }
+      }
+    },
+    "/voter-id-verify/verify": {
+      "get": {
+        "summary": "Voter ID Verification v2",
+        "description": "Verify Voter ID details directly from Indian national electoral registries with status records.",
+        "tags": [
+          "Verification APIs"
+        ],
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "api_key",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "vh_live_xxxxxxxxxxxx"
+            },
+            "description": "API key for gateway authentication"
+          },
+          {
+            "name": "epic",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "Enter Voter ID"
+            },
+            "description": "EPIC Number"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful verification details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "example": {
+                    "success": true,
+                    "requestId": "req_voterid123",
+                    "serviceType": "VOTER_ID_VERIFY",
+                    "latencyMs": 135,
+                    "provider": "signzy",
+                    "data": {
+                      "epicNumber": "ABC1234567",
+                      "fullName": "MAYANK KUMAR SHARMA",
+                      "gender": "MALE",
+                      "state": "Rajasthan",
+                      "status": "ACTIVE"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized or invalid API Key"
+          },
+          "403": {
+            "description": "Insufficient wallet balance or scope"
+          },
+          "429": {
+            "description": "Too many requests - Rate limit exceeded"
+          },
+          "502": {
+            "description": "Provider communication failure"
+          }
+        }
+      }
+    },
+    "/passport-verify/verify": {
+      "get": {
+        "summary": "Passport Verification",
+        "description": "Validate Passport files against national database records for user identity mapping.",
+        "tags": [
+          "KYC Verification"
+        ],
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "api_key",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "vh_live_xxxxxxxxxxxx"
+            },
+            "description": "API key for gateway authentication"
+          },
+          {
+            "name": "passport_no",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "Enter Passport Number"
+            },
+            "description": "Passport Number"
+          },
+          {
+            "name": "file_no",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "Enter File Number"
+            },
+            "description": "File Number"
+          },
+          {
+            "name": "dob",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "YYYY-MM-DD"
+            },
+            "description": "Date of Birth"
+          },
+          {
+            "name": "name",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "Enter Name"
+            },
+            "description": "Holder Name"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful verification details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "example": {
+                    "success": true,
+                    "requestId": "req_pass123",
+                    "serviceType": "PASSPORT_VERIFY",
+                    "latencyMs": 255,
+                    "provider": "surepass",
+                    "data": {
+                      "passportNo": "A1234567",
+                      "fileNo": "JA1234567890",
+                      "dob": "1998-03-18",
+                      "name": "MAYANK SHARMA",
+                      "status": "VALID",
+                      "issueDate": "2018-05-20",
+                      "expiryDate": "2028-05-19"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized or invalid API Key"
+          },
+          "403": {
+            "description": "Insufficient wallet balance or scope"
+          },
+          "429": {
+            "description": "Too many requests - Rate limit exceeded"
+          },
+          "502": {
+            "description": "Provider communication failure"
+          }
+        }
+      }
+    },
+    "/driving-license-verify/verify": {
+      "get": {
+        "summary": "Driving Licence Verification",
+        "description": "Verify driving license details, holder profile status, validity, and vehicle classes classes.",
+        "tags": [
+          "KYC Verification"
+        ],
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "api_key",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "vh_live_xxxxxxxxxxxx"
+            },
+            "description": "API key for gateway authentication"
+          },
+          {
+            "name": "dl_no",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "Enter License Number"
+            },
+            "description": "Driving License Number"
+          },
+          {
+            "name": "dob",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "YYYY-MM-DD"
+            },
+            "description": "Date of Birth (YYYY-MM-DD)"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful verification details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "example": {
+                    "success": true,
+                    "requestId": "req_dl123",
+                    "serviceType": "DRIVING_LICENSE_VERIFY",
+                    "latencyMs": 195,
+                    "provider": "surepass",
+                    "data": {
+                      "dlNo": "DL-1220180004567",
+                      "dob": "1998-03-18",
+                      "holderName": "MAYANK KUMAR SHARMA",
+                      "status": "ACTIVE",
+                      "vehicleClasses": [
+                        "MCWG",
+                        "LMV"
+                      ],
+                      "issueDate": "2016-04-12",
+                      "expiryDate": "2036-04-11"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized or invalid API Key"
+          },
+          "403": {
+            "description": "Insufficient wallet balance or scope"
+          },
+          "429": {
+            "description": "Too many requests - Rate limit exceeded"
+          },
+          "502": {
+            "description": "Provider communication failure"
+          }
+        }
+      }
+    },
+    "/mca-company-search/verify": {
+      "get": {
+        "summary": "MCA Company Search",
+        "description": "Verify details of companies registered with the Ministry of Corporate Affairs.",
+        "tags": [
+          "KYC Verification"
+        ],
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "api_key",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "vh_live_xxxxxxxxxxxx"
+            },
+            "description": "API key for gateway authentication"
+          },
+          {
+            "name": "cin",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "Enter CIN"
+            },
+            "description": "Company CIN / Name"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful verification details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "example": {
+                    "success": true,
+                    "requestId": "req_mca123",
+                    "serviceType": "MCA_COMPANY_SEARCH",
+                    "latencyMs": 205,
+                    "provider": "karza",
+                    "data": {
+                      "cin": "U72900DL2022PTC394857",
+                      "companyName": "DIZIPAY SOLUTIONS PRIVATE LIMITED",
+                      "incorporationDate": "2022-03-10",
+                      "authorizedCapital": 1000000,
+                      "paidUpCapital": 100000,
+                      "status": "ACTIVE"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized or invalid API Key"
+          },
+          "403": {
+            "description": "Insufficient wallet balance or scope"
+          },
+          "429": {
+            "description": "Too many requests - Rate limit exceeded"
+          },
+          "502": {
+            "description": "Provider communication failure"
+          }
+        }
+      }
+    },
+    "/bank-verify/verify": {
+      "get": {
+        "summary": "Bank Account Verification",
+        "description": "Validate bank account number existence and fetch matching beneficiary holder name.",
+        "tags": [
+          "KYC Verification"
+        ],
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "api_key",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "vh_live_xxxxxxxxxxxx"
+            },
+            "description": "API key for gateway authentication"
+          },
+          {
+            "name": "account_no",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "Enter Account Number"
+            },
+            "description": "Account Number"
+          },
+          {
+            "name": "ifsc",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "Enter IFSC"
+            },
+            "description": "IFSC Code"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful verification details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "example": {
+                    "success": true,
+                    "requestId": "req_bank123",
+                    "serviceType": "BANK_VERIFY",
+                    "latencyMs": 145,
+                    "provider": "signzy",
+                    "data": {
+                      "accountNo": "919876543210",
+                      "ifsc": "PYTM0123456",
+                      "beneficiaryName": "MAYANK SHARMA",
+                      "status": "VERIFIED",
+                      "bankName": "PAYMENTS BANK"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized or invalid API Key"
+          },
+          "403": {
+            "description": "Insufficient wallet balance or scope"
+          },
+          "429": {
+            "description": "Too many requests - Rate limit exceeded"
+          },
+          "502": {
+            "description": "Provider communication failure"
+          }
+        }
+      }
+    },
+    "/upi-verify/verify": {
+      "get": {
+        "summary": "UPI ID Verification",
+        "description": "Verify virtual payment address (VPA) details and validate matching name.",
+        "tags": [
+          "KYC Verification"
+        ],
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "api_key",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "vh_live_xxxxxxxxxxxx"
+            },
+            "description": "API key for gateway authentication"
+          },
+          {
+            "name": "upi_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "Enter UPI ID"
+            },
+            "description": "UPI ID (VPA)"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful verification details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "example": {
+                    "success": true,
+                    "requestId": "req_upi123",
+                    "serviceType": "UPI_VERIFY",
+                    "latencyMs": 105,
+                    "provider": "surepass",
+                    "data": {
+                      "upiId": "mayank@upi",
+                      "name": "MAYANK KUMAR SHARMA",
+                      "status": "ACTIVE"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized or invalid API Key"
+          },
+          "403": {
+            "description": "Insufficient wallet balance or scope"
+          },
+          "429": {
+            "description": "Too many requests - Rate limit exceeded"
+          },
+          "502": {
+            "description": "Provider communication failure"
+          }
+        }
+      }
+    },
+    "/vehicle-challan/verify": {
+      "get": {
+        "summary": "Vehicle Challan Search",
+        "description": "Search for active traffic challans, violations, penalties, and status details.",
+        "tags": [
+          "Verification APIs"
+        ],
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "api_key",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "vh_live_xxxxxxxxxxxx"
+            },
+            "description": "API key for gateway authentication"
+          },
+          {
+            "name": "vehicle_no",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "Enter Vehicle Number"
+            },
+            "description": "Vehicle Number"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful verification details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "example": {
+                    "success": true,
+                    "requestId": "req_challan123",
+                    "serviceType": "VEHICLE_CHALLAN",
+                    "latencyMs": 235,
+                    "provider": "surepass",
+                    "data": {
+                      "vehicleNo": "DL3CA1234",
+                      "challans": [
+                        {
+                          "challanNo": "DL12345678",
+                          "amount": 500,
+                          "date": "2023-11-01",
+                          "violation": "Speed Limit Violation",
+                          "status": "PENDING"
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized or invalid API Key"
+          },
+          "403": {
+            "description": "Insufficient wallet balance or scope"
+          },
+          "429": {
+            "description": "Too many requests - Rate limit exceeded"
+          },
+          "502": {
+            "description": "Provider communication failure"
+          }
+        }
+      }
+    },
+    "/rc-advanced/verify": {
+      "get": {
+        "summary": "RC Verification Advanced",
+        "description": "Advanced details on vehicle registration including chasis, engine, weight, and status logs.",
+        "tags": [
+          "Verification APIs"
+        ],
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "api_key",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "vh_live_xxxxxxxxxxxx"
+            },
+            "description": "API key for gateway authentication"
+          },
+          {
+            "name": "vehicle_no",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "Enter Vehicle Number"
+            },
+            "description": "Vehicle Number"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful verification details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "example": {
+                    "success": true,
+                    "requestId": "req_rcadv123",
+                    "serviceType": "RC_ADVANCED",
+                    "latencyMs": 185,
+                    "provider": "surepass",
+                    "data": {
+                      "vehicleNo": "DL3CA1234",
+                      "ownerName": "MAYANK SHARMA",
+                      "chasisNo": "MA3FEXXXXXXXXXX",
+                      "engineNo": "K12MXXXXXXX",
+                      "bodyType": "HATCHBACK",
+                      "color": "GREY",
+                      "weight": 950,
+                      "status": "ACTIVE"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized or invalid API Key"
+          },
+          "403": {
+            "description": "Insufficient wallet balance or scope"
+          },
+          "429": {
+            "description": "Too many requests - Rate limit exceeded"
+          },
+          "502": {
+            "description": "Provider communication failure"
+          }
+        }
+      }
+    },
+    "/rc-to-mobile/verify": {
+      "get": {
+        "summary": "RC to Mobile Number Search",
+        "description": "Retrieve the masked registered mobile number linked to a specific vehicle registration.",
+        "tags": [
+          "Verification APIs"
+        ],
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "api_key",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "vh_live_xxxxxxxxxxxx"
+            },
+            "description": "API key for gateway authentication"
+          },
+          {
+            "name": "vehicle_no",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "Enter Vehicle Number"
+            },
+            "description": "Vehicle Number"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful verification details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "example": {
+                    "success": true,
+                    "requestId": "req_rcmob123",
+                    "serviceType": "RC_TO_MOBILE",
+                    "latencyMs": 215,
+                    "provider": "surepass",
+                    "data": {
+                      "vehicleNo": "DL3CA1234",
+                      "mobileNo": "+91******4567",
+                      "ownerName": "MAYANK SHARMA"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized or invalid API Key"
+          },
+          "403": {
+            "description": "Insufficient wallet balance or scope"
+          },
+          "429": {
+            "description": "Too many requests - Rate limit exceeded"
+          },
+          "502": {
+            "description": "Provider communication failure"
+          }
+        }
+      }
+    },
+    "/mobile-to-rc/verify": {
+      "get": {
+        "summary": "Mobile Number to RC Search",
+        "description": "List all registered vehicle numbers linked to a specific mobile number.",
+        "tags": [
+          "Verification APIs"
+        ],
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "api_key",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "vh_live_xxxxxxxxxxxx"
+            },
+            "description": "API key for gateway authentication"
+          },
+          {
+            "name": "mobile_no",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "Enter Mobile Number"
+            },
+            "description": "Mobile Number"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful verification details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "example": {
+                    "success": true,
+                    "requestId": "req_mobrc123",
+                    "serviceType": "MOBILE_TO_RC",
+                    "latencyMs": 235,
+                    "provider": "surepass",
+                    "data": {
+                      "mobileNo": "9876543210",
+                      "vehicles": [
+                        "DL3CA1234",
+                        "RJ14CA5678"
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized or invalid API Key"
+          },
+          "403": {
+            "description": "Insufficient wallet balance or scope"
+          },
+          "429": {
+            "description": "Too many requests - Rate limit exceeded"
+          },
+          "502": {
+            "description": "Provider communication failure"
+          }
+        }
+      }
+    },
+    "/rc-lite/verify": {
+      "get": {
+        "summary": "RC Lite Verification",
+        "description": "Check active status and model descriptions on vehicle registration profiles.",
+        "tags": [
+          "Verification APIs"
+        ],
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "api_key",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "vh_live_xxxxxxxxxxxx"
+            },
+            "description": "API key for gateway authentication"
+          },
+          {
+            "name": "vehicle_no",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "Enter Vehicle Number"
+            },
+            "description": "Vehicle Number"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful verification details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "example": {
+                    "success": true,
+                    "requestId": "req_rclite123",
+                    "serviceType": "RC_LITE",
+                    "latencyMs": 95,
+                    "provider": "surepass",
+                    "data": {
+                      "vehicleNo": "DL3CA1234",
+                      "status": "ACTIVE",
+                      "makerModel": "MARUTI SWIFT"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized or invalid API Key"
+          },
+          "403": {
+            "description": "Insufficient wallet balance or scope"
+          },
+          "429": {
+            "description": "Too many requests - Rate limit exceeded"
+          },
+          "502": {
+            "description": "Provider communication failure"
+          }
+        }
+      }
+    },
+    "/mobile-to-pan/verify": {
+      "get": {
+        "summary": "Mobile Number to PAN Search",
+        "description": "Retrieve the PAN number registered and linked to a specific mobile number.",
+        "tags": [
+          "KYC Verification"
+        ],
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "api_key",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "vh_live_xxxxxxxxxxxx"
+            },
+            "description": "API key for gateway authentication"
+          },
+          {
+            "name": "mobile_no",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "Enter Mobile Number"
+            },
+            "description": "Mobile Number"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful verification details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "example": {
+                    "success": true,
+                    "requestId": "req_mobpan123",
+                    "serviceType": "MOBILE_TO_PAN",
+                    "latencyMs": 240,
+                    "provider": "surepass",
+                    "data": {
+                      "mobileNo": "9876543210",
+                      "pan": "ABCDE1234F",
+                      "name": "MAYANK KUMAR SHARMA"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized or invalid API Key"
+          },
+          "403": {
+            "description": "Insufficient wallet balance or scope"
+          },
+          "429": {
+            "description": "Too many requests - Rate limit exceeded"
+          },
+          "502": {
+            "description": "Provider communication failure"
+          }
+        }
+      }
+    },
+    "/ration-card/verify": {
+      "get": {
+        "summary": "Ration Card Verify",
+        "description": "Retrieve ration card details and status.",
+        "tags": [
+          "Verification APIs"
+        ],
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "api_key",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "vh_live_xxxxxxxxxxxx"
+            },
+            "description": "API key for gateway authentication"
+          },
+          {
+            "name": "ration",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "Enter Ration Card Number"
+            },
+            "description": "Ration Number"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful verification details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "example": {
+                    "success": true,
+                    "requestId": "req_ration123",
+                    "serviceType": "RATION_CARD_VERIFY",
+                    "latencyMs": 140,
+                    "provider": "surepass",
+                    "data": {
+                      "ration_number": "123456789",
+                      "status": "ACTIVE",
+                      "response": {
+                        "name": "M K SHARMA",
+                        "members": 4
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized or invalid API Key"
+          },
+          "403": {
+            "description": "Insufficient wallet balance or scope"
+          },
+          "429": {
+            "description": "Too many requests - Rate limit exceeded"
+          },
+          "502": {
+            "description": "Provider communication failure"
+          }
+        }
+      }
+    },
+    "/aadhaar-short/verify": {
+      "get": {
+        "summary": "Aadhaar Short Status",
+        "description": "Get short status of Aadhaar linkage, mapping, and PAN connection.",
+        "tags": [
+          "KYC Verification"
+        ],
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "api_key",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "vh_live_xxxxxxxxxxxx"
+            },
+            "description": "API key for gateway authentication"
+          },
+          {
+            "name": "aadhar",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "Enter Aadhaar Number"
+            },
+            "description": "Aadhaar Number"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful verification details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "example": {
+                    "success": true,
+                    "requestId": "req_ashort123",
+                    "serviceType": "AADHAAR_SHORT_STATUS",
+                    "latencyMs": 180,
+                    "provider": "surepass",
+                    "data": {
+                      "status": "SUCCESS",
+                      "code": 200,
+                      "pan_no": "ABCDE1234F",
+                      "message": "Aadhaar is linked with PAN."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized or invalid API Key"
+          },
+          "403": {
+            "description": "Insufficient wallet balance or scope"
+          },
+          "429": {
+            "description": "Too many requests - Rate limit exceeded"
+          },
+          "502": {
+            "description": "Provider communication failure"
+          }
+        }
+      }
+    },
+    "/gst-company/verify": {
+      "get": {
+        "summary": "GST Company Info",
+        "description": "Fetch complete corporate details, tax payer type, and active status using GSTIN.",
+        "tags": [
+          "Verification APIs"
+        ],
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "api_key",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "vh_live_xxxxxxxxxxxx"
+            },
+            "description": "API key for gateway authentication"
+          },
+          {
+            "name": "gstin",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "Enter GSTIN Number"
+            },
+            "description": "GSTIN"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful verification details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "example": {
+                    "success": true,
+                    "requestId": "req_gstinfo123",
+                    "serviceType": "GST_COMPANY_INFO",
+                    "latencyMs": 290,
+                    "provider": "surepass",
+                    "data": {
+                      "legal_name": "DIZIPAY TECHNOLOGIES PRIVATE LIMITED",
+                      "constitution": "Private Limited Company",
+                      "gstin": "22AAAAA0000A1Z5",
+                      "status": "ACTIVE",
+                      "tax_payer_type": "Regular",
+                      "registration_date": "2023-05-12",
+                      "state_jurisdiction": "TELANGANA",
+                      "central_jurisdiction": "HYDERABAD"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized or invalid API Key"
+          },
+          "403": {
+            "description": "Insufficient wallet balance or scope"
+          },
+          "429": {
+            "description": "Too many requests - Rate limit exceeded"
+          },
+          "502": {
+            "description": "Provider communication failure"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "ApiKeyAuth": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "x-api-key"
+      }
+    }
+  }
+}

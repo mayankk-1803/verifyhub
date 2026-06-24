@@ -1,0 +1,1 @@
+import{r}from"./react-core-B7BF4mUS.js";import{u as o}from"./react-router-WWfOJIoJ.js";import"./vendor-CyZfcYGW.js";function n(){const t=o();return r.useEffect(()=>{t("/login")},[t]),null}export{n as default};

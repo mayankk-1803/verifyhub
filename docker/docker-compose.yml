@@ -1,0 +1,59 @@
+version: '3.8'
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: verifyhub-mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: Mayank@1803
+      MYSQL_DATABASE: verifyhub
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+
+  redis:
+    image: redis:alpine
+    container_name: verifyhub-redis
+    restart: always
+    ports:
+      - "6379:6379"
+
+  server:
+    build:
+      context: ../server
+      dockerfile: ../docker/Dockerfile.server
+    container_name: verifyhub-server
+    restart: always
+    ports:
+      - "5000:5000"
+    environment:
+      - PORT=5000
+      - DB_HOST=mysql
+      - DB_PORT=3306
+      - DB_NAME=verifyhub
+      - DB_USER=root
+      - DB_PASSWORD=Mayank@1803
+      - DATABASE_URL=mysql://root:Mayank%401803@mysql:3306/verifyhub
+      - REDIS_URL=redis://redis:6379
+      - JWT_SECRET=verifyhub_jwt_secret
+      - JWT_REFRESH_SECRET=verifyhub_refresh_secret
+      - FRONTEND_URL=http://localhost
+    depends_on:
+      - mysql
+      - redis
+
+  client:
+    build:
+      context: ../client
+      dockerfile: ../docker/Dockerfile.client
+    container_name: verifyhub-client
+    restart: always
+    ports:
+      - "80:80"
+    depends_on:
+      - server
+
+volumes:
+  mysql-data:
