@@ -1,56 +1,31 @@
 /** @type {import('tailwindcss').Config} */
 export default {
-  content: [
-    "./index.html",
-    "./src/**/*.{js,ts,jsx,tsx}",
-  ],
+  darkMode: 'class',
+  content: ["./index.html", "./src/**/*.{js,ts,jsx,tsx}"],
   theme: {
     extend: {
       colors: {
-        background: "#F8FAFC",
-        surface: "#FFFFFF",
-        card: "#FFFFFF",
-        primary: {
-          DEFAULT: "#6D5DFC",
-          hover: "#5A4CE8"
-        },
-        secondary: {
-          DEFAULT: "#00C2FF",
-          hover: "#00AEE0"
-        },
-        accent: {
-          DEFAULT: "#00D084",
-          hover: "#00B873"
-        },
-        text: {
-          primary: "#0F172A",
-          secondary: "#475569",
-          DEFAULT: "#0F172A"
-        },
-        muted: "#64748B",
-        border: "#E2E8F0"
+        background: "#F8FAFC", surface: "#FFFFFF", card: "#FFFFFF",
+        primary: { DEFAULT: "#16A34A", hover: "#15803D" },
+        secondary: { DEFAULT: "#22C55E", hover: "#16A34A" },
+        accent: { DEFAULT: "#10B981", hover: "#059669" },
+        charcoal: { DEFAULT: "#0F172A", surface: "#1E293B" },
+        text: { primary: "#0F172A", secondary: "#475569", DEFAULT: "#0F172A" },
+        muted: "#64748B", border: "#E2E8F0", danger: "#EF4444", warning: "#F59E0B"
       },
-      fontFamily: {
-        sans: ["Inter", "sans-serif"],
-        display: ["Space Grotesk", "sans-serif"]
-      },
-      borderRadius: {
-        'clay': '24px',
-        'clay-sm': '16px',
-        'clay-lg': '32px'
-      },
+      fontFamily: { sans: ["Inter", "sans-serif"], display: ["Space Grotesk", "Inter", "sans-serif"] },
+      borderRadius: { clay: '24px', 'clay-sm': '16px', 'clay-lg': '32px' },
       boxShadow: {
-        // High quality Light Theme Claymorphism shadows (soft grey shadows + white highlights)
-        'clay-card': '0 20px 40px rgba(15, 23, 42, 0.06), inset 0 3px 6px rgba(255, 255, 255, 0.9), inset 0 -10px 20px rgba(15, 23, 42, 0.03), inset 10px 0 20px rgba(255, 255, 255, 0.5)',
-        'clay-card-hover': '0 30px 60px rgba(109, 93, 252, 0.12), inset 0 3px 8px rgba(255, 255, 255, 0.95), inset 0 -12px 24px rgba(15, 23, 42, 0.04), inset 12px 0 24px rgba(255, 255, 255, 0.6)',
-        'clay-primary': '0 12px 24px rgba(109, 93, 252, 0.25), inset 0 2px 4px rgba(255, 255, 255, 0.4), inset 0 -6px 12px rgba(0, 0, 0, 0.25), inset 6px 0 12px rgba(255, 255, 255, 0.2)',
-        'clay-primary-hover': '0 16px 32px rgba(109, 93, 252, 0.35), inset 0 3px 6px rgba(255, 255, 255, 0.5), inset 0 -8px 16px rgba(0, 0, 0, 0.3), inset 8px 0 16px rgba(255, 255, 255, 0.25)',
-        'clay-secondary': '0 12px 24px rgba(0, 194, 255, 0.2), inset 0 2px 4px rgba(255, 255, 255, 0.4), inset 0 -6px 12px rgba(0, 0, 0, 0.2), inset 6px 0 12px rgba(255, 255, 255, 0.2)',
-        'clay-accent': '0 12px 24px rgba(0, 208, 132, 0.2), inset 0 2px 4px rgba(255, 255, 255, 0.4), inset 0 -6px 12px rgba(0, 0, 0, 0.2), inset 6px 0 12px rgba(255, 255, 255, 0.2)',
-        'clay-input': 'inset 0 2px 4px rgba(15, 23, 42, 0.05), inset 0 -1px 2px rgba(255, 255, 255, 0.8), 0 2px 4px rgba(15, 23, 42, 0.02)',
-        'clay-input-focus': 'inset 0 2px 4px rgba(15, 23, 42, 0.08), inset 0 -1px 2px rgba(255, 255, 255, 0.8), 0 0 12px rgba(109, 93, 252, 0.3)'
+        'clay-card': '0 20px 45px rgba(15,23,42,0.07), inset 0 1px 0 rgba(255,255,255,0.92)',
+        'clay-card-hover': '0 28px 70px rgba(22,163,74,0.16), inset 0 1px 0 rgba(255,255,255,0.95)',
+        'clay-primary': '0 16px 32px rgba(22,163,74,0.24), inset 0 1px 0 rgba(255,255,255,0.24)',
+        'clay-primary-hover': '0 18px 42px rgba(22,163,74,0.34), inset 0 1px 0 rgba(255,255,255,0.28)',
+        'clay-secondary': '0 14px 30px rgba(34,197,94,0.18), inset 0 1px 0 rgba(255,255,255,0.24)',
+        'clay-accent': '0 14px 30px rgba(16,185,129,0.18), inset 0 1px 0 rgba(255,255,255,0.24)',
+        'clay-input': '0 1px 2px rgba(15,23,42,0.04), inset 0 1px 2px rgba(15,23,42,0.04)',
+        'clay-input-focus': '0 0 0 4px rgba(22,163,74,0.10), 0 1px 2px rgba(15,23,42,0.04)'
       }
-    },
+    }
   },
-  plugins: [],
-}
+  plugins: []
+};

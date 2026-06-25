@@ -33,10 +33,10 @@ export default function ResetPassword() {
   };
 
   return (
-    <div className="min-h-[100dvh] flex items-center justify-center p-6 relative bg-gradient-to-br from-slate-50 via-white to-violet-50 overflow-hidden">
+    <div className="min-h-[100dvh] flex items-center justify-center p-6 relative bg-gradient-to-br from-slate-50 via-white to-emerald-50 overflow-hidden">
       {/* Background radial overlays */}
-      <div className="absolute top-1/4 left-1/4 w-72 h-72 rounded-full bg-violet-400/10 blur-[100px]" />
-      <div className="absolute bottom-1/4 right-1/4 w-72 h-72 rounded-full bg-blue-400/10 blur-[100px]" />
+      <div className="absolute top-1/4 left-1/4 w-72 h-72 rounded-full bg-emerald-400/10 blur-[100px]" />
+      <div className="absolute bottom-1/4 right-1/4 w-72 h-72 rounded-full bg-teal-400/10 blur-[100px]" />
 
       <div className="w-full max-w-md relative z-10">
         <div className="text-center mb-8">
@@ -76,13 +76,13 @@ export default function ResetPassword() {
               placeholder="••••••••"
               required
             />
-            <ClayButton type="submit" variant="primary" disabled={loading} className="w-full py-3.5 flex justify-center items-center bg-violet-600 hover:bg-violet-700 text-white font-semibold shadow-xl shadow-violet-500/30 hover:scale-105 transition-all">
+            <ClayButton type="submit" variant="primary" disabled={loading} className="w-full py-3.5 flex justify-center items-center bg-emerald-600 hover:bg-emerald-700 text-white font-semibold shadow-xl shadow-emerald-500/30 hover:scale-105 transition-all">
               {loading ? 'Saving password...' : 'Update Password'}
             </ClayButton>
           </form>
 
           <div className="mt-6 pt-6 border-t border-slate-100 text-center text-xs text-slate-500">
-            <Link to="/login" className="text-violet-600 hover:text-violet-700 hover:underline font-bold">Back to Sign In</Link>
+            <Link to="/login" className="text-emerald-600 hover:text-emerald-700 hover:underline font-bold">Back to Sign In</Link>
           </div>
         </ClayCard>
       </div>

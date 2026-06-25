@@ -22,7 +22,7 @@ export default class ErrorBoundary extends Component {
             <span className="text-red-400 font-bold font-display">Something went wrong loading this panel.</span>
             <p className="text-xs text-slate-500 max-w-sm leading-relaxed">This may be caused by a temporary network or runtime error. Please retry.</p>
             <button
-              className="py-2 px-5 bg-violet-650 hover:bg-violet-750 text-white rounded-full text-xs font-semibold transition-colors shadow-sm"
+              className="py-2 px-5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-full text-xs font-semibold transition-colors shadow-sm"
               onClick={() => {
                 this.setState({ hasError: false, error: null });
                 if (this.props.onRetry) {
@@ -59,7 +59,7 @@ export default class ErrorBoundary extends Component {
                 this.setState({ hasError: false, error: null });
                 window.location.reload();
               }}
-              className="w-full py-3 px-6 rounded-full bg-violet-600 hover:bg-violet-700 text-white font-semibold text-xs shadow-md transition-colors duration-200"
+              className="w-full py-3 px-6 rounded-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs shadow-md transition-colors duration-200"
             >
               Reload Platform
             </button>

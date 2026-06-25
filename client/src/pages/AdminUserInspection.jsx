@@ -1,3 +1,4 @@
+import toast from '../lib/toast.jsx';
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import api from '../lib/api';
@@ -58,7 +59,7 @@ export default function AdminUserInspection() {
       }
     } catch (err) {
       console.error('Failed to fetch user details:', err);
-      alert('Failed to load user inspection details.');
+      toast.info('Failed to load user inspection details.');
     } finally {
       setLoading(false);
     }
@@ -73,7 +74,7 @@ export default function AdminUserInspection() {
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center p-12 min-h-[400px]">
-        <div className="w-8 h-8 border-4 border-violet-600 border-t-transparent rounded-full animate-spin mb-4" />
+        <div className="w-8 h-8 border-4 border-emerald-600 border-t-transparent rounded-full animate-spin mb-4" />
         <span className="text-sm font-semibold text-slate-500">Retrieving user administration context...</span>
       </div>
     );
@@ -142,7 +143,7 @@ export default function AdminUserInspection() {
 
       {/* Hero Header Block */}
       <ClayCard className="overflow-hidden border border-slate-200 shadow-sm relative rounded-[24px] bg-white p-0">
-        <div className="h-28 w-full bg-gradient-to-r from-slate-800 to-indigo-900 relative opacity-90" />
+        <div className="h-28 w-full bg-gradient-to-r from-slate-800 to-emerald-900 relative opacity-90" />
         <div className="px-6 pb-6 pt-0 flex flex-col md:flex-row gap-6 items-end -mt-12 relative z-10">
           
           <div className="w-24 h-28 rounded-2xl border-4 border-white shadow-md overflow-hidden bg-slate-100 flex items-center justify-center shrink-0">
@@ -164,7 +165,7 @@ export default function AdminUserInspection() {
             <p className="text-xs text-slate-500 font-medium mt-1 flex items-center gap-1.5">
               <Mail className="w-3.5 h-3.5" /> {userData.email}
               <span className="text-slate-300">|</span>
-              <Shield className="w-3.5 h-3.5 text-indigo-600" /> {userData.role?.name || 'Client User'}
+              <Shield className="w-3.5 h-3.5 text-emerald-600" /> {userData.role?.name || 'Client User'}
             </p>
             <p className="text-[10px] text-slate-400 font-mono mt-1">
               User ID: #{userData.id} | Joined: {new Date(userData.createdAt).toLocaleDateString()}
@@ -190,7 +191,7 @@ export default function AdminUserInspection() {
               
               <div className="bg-white border border-slate-200 rounded-[20px] p-6 shadow-sm flex flex-col gap-4">
                 <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400 border-b border-slate-100 pb-3 flex items-center gap-2">
-                  <User className="w-4 h-4 text-violet-600" /> Personal Details
+                  <User className="w-4 h-4 text-emerald-600" /> Personal Details
                 </h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
                   <div>
@@ -227,7 +228,7 @@ export default function AdminUserInspection() {
               {/* Verified Aadhaar Photo Section */}
               <div className="bg-white border border-slate-200 rounded-[20px] p-6 shadow-sm flex flex-col gap-4">
                 <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400 border-b border-slate-100 pb-3 flex items-center gap-2">
-                  <Shield className="w-4 h-4 text-violet-600" /> Verified Aadhaar Photo
+                  <Shield className="w-4 h-4 text-emerald-600" /> Verified Aadhaar Photo
                 </h3>
                 <div className="flex flex-col sm:flex-row gap-5 items-center">
                   <div className="w-24 h-28 bg-slate-50 rounded-xl border border-slate-200 p-1.5 shadow-sm relative overflow-hidden flex items-center justify-center shrink-0">
@@ -257,7 +258,7 @@ export default function AdminUserInspection() {
               {/* Aadhaar Details Card */}
               <div className="bg-white border border-slate-200 rounded-[20px] p-6 shadow-sm flex flex-col gap-4">
                 <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400 border-b border-slate-100 pb-3 flex items-center gap-2">
-                  <CheckCircle2 className="w-4 h-4 text-indigo-600" /> Aadhaar Verification
+                  <CheckCircle2 className="w-4 h-4 text-emerald-600" /> Aadhaar Verification
                 </h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
                   <div>
@@ -383,7 +384,7 @@ export default function AdminUserInspection() {
         {activeTab === 'subscriptions' && (
           <ClayCard className="border border-slate-200 shadow-sm rounded-[24px] bg-white p-6">
             <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400 border-b border-slate-100 pb-3 flex items-center gap-2 mb-4">
-              <Shield className="w-4 h-4 text-violet-600" /> UserServiceSubscriptions
+              <Shield className="w-4 h-4 text-emerald-600" /> UserServiceSubscriptions
             </h3>
             {userData.subscriptions && userData.subscriptions.length > 0 ? (
               <ClayTable headers={['Service Code', 'Service Name', 'Category', 'Status', 'Activated At', 'Expires At', 'Purchase Fee']}>
@@ -437,7 +438,7 @@ export default function AdminUserInspection() {
 
             <ClayCard className="border border-slate-200 shadow-sm rounded-[24px] bg-white p-6">
               <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400 border-b border-slate-100 pb-3 flex items-center gap-2 mb-4">
-                <Wallet className="w-4 h-4 text-violet-600" /> Wallet Ledger Entries (Transactions)
+                <Wallet className="w-4 h-4 text-emerald-600" /> Wallet Ledger Entries (Transactions)
               </h3>
               {transactions.length > 0 ? (
                 <>
@@ -500,7 +501,7 @@ export default function AdminUserInspection() {
         {activeTab === 'keys' && (
           <ClayCard className="border border-slate-200 shadow-sm rounded-[24px] bg-white p-6">
             <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400 border-b border-slate-100 pb-3 flex items-center gap-2 mb-4">
-              <Key className="w-4 h-4 text-violet-600" /> Active API Access Credentials
+              <Key className="w-4 h-4 text-emerald-600" /> Active API Access Credentials
             </h3>
             {userData.apiKeys && userData.apiKeys.length > 0 ? (
               <ClayTable headers={['Key Name', 'Masked Key', 'Permissions', 'Rate Limit', 'Usage Count', 'Status', 'IP Whitelist', 'Created At']}>
@@ -508,7 +509,7 @@ export default function AdminUserInspection() {
                   <tr key={`api-key-${k.id}`} className="hover:bg-slate-50/50">
                     <td className="px-6 py-4 font-bold text-slate-900">{k.name || '—'}</td>
                     <td className="px-6 py-4 font-mono text-slate-500 font-semibold">{k.keyMasked || '—'}</td>
-                    <td className="px-6 py-4 font-mono text-xs text-violet-600 font-bold">
+                    <td className="px-6 py-4 font-mono text-xs text-emerald-600 font-bold">
                       {Array.isArray(k.permissions) ? k.permissions.join(', ') : JSON.stringify(k.permissions || '*')}
                     </td>
                     <td className="px-6 py-4 text-slate-600 font-bold font-mono">{k.rateLimit} req/min</td>
@@ -535,7 +536,7 @@ export default function AdminUserInspection() {
         {activeTab === 'verifications' && (
           <ClayCard className="border border-slate-200 shadow-sm rounded-[24px] bg-white p-6">
             <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400 border-b border-slate-100 pb-3 flex items-center gap-2 mb-4">
-              <Terminal className="w-4 h-4 text-violet-600" /> Verification Request Audit History
+              <Terminal className="w-4 h-4 text-emerald-600" /> Verification Request Audit History
             </h3>
             {requests.length > 0 ? (
               <>
@@ -599,7 +600,7 @@ export default function AdminUserInspection() {
         {activeTab === 'audit' && (
           <ClayCard className="border border-slate-200 shadow-sm rounded-[24px] bg-white p-6">
             <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400 border-b border-slate-100 pb-3 flex items-center gap-2 mb-4">
-              <History className="w-4 h-4 text-violet-600" /> Administrative Action Audit Trail
+              <History className="w-4 h-4 text-emerald-600" /> Administrative Action Audit Trail
             </h3>
             {auditLogs.length > 0 ? (
               <>

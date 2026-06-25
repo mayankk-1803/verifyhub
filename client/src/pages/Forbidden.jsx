@@ -31,7 +31,7 @@ export default function Forbidden() {
           <ClayButton
             variant="primary"
             onClick={() => navigate('/dashboard')}
-            className="w-full flex items-center justify-center gap-2 mt-2 bg-violet-600 text-white font-bold"
+            className="w-full flex items-center justify-center gap-2 mt-2 bg-emerald-600 text-white font-bold"
           >
             <ArrowLeft className="w-4 h-4" />
             Back to Dashboard

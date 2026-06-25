@@ -45,7 +45,7 @@ export default function DeveloperDocs() {
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center p-20 min-h-[400px] border border-slate-200 bg-white rounded-[24px] shadow-sm text-center">
-        <RefreshCw className="w-10 h-10 text-violet-650 animate-spin mb-4" />
+        <RefreshCw className="w-10 h-10 text-emerald-600 animate-spin mb-4" />
         <h4 className="text-base font-bold text-slate-800 font-display">Loading Developer Documentation</h4>
         <p className="text-xs text-slate-500 mt-1 max-w-sm">Fetching service catalogs and OpenAPI specifications from server...</p>
       </div>
@@ -132,7 +132,7 @@ export default function DeveloperDocs() {
               onClick={() => setSelectedApiKey(service.key)}
               className={`flex items-center justify-between p-3 rounded-2xl text-xs font-semibold font-sans transition-all duration-150 ${
                 selectedService.key === service.key
-                  ? 'bg-violet-50 text-violet-700'
+                  ? 'bg-emerald-50 text-emerald-700'
                   : 'text-slate-650 hover:bg-slate-50'
               }`}
             >
@@ -141,7 +141,7 @@ export default function DeveloperDocs() {
                 <span className="text-[10px] text-slate-450 font-mono mt-0.5 truncate">{service.endpoint}</span>
               </div>
               <span className={`text-[8px] font-bold px-1.5 py-0.5 rounded font-mono shrink-0 ${
-                service.method === 'GET' ? 'bg-emerald-100 text-emerald-700' : 'bg-indigo-100 text-indigo-700'
+                service.method === 'GET' ? 'bg-emerald-100 text-emerald-700' : 'bg-emerald-100 text-emerald-700'
               }`}>
                 {service.method}
               </span>
@@ -158,7 +158,7 @@ export default function DeveloperDocs() {
             className="flex items-center justify-between p-4 rounded-[24px] border border-slate-200 bg-slate-50 hover:bg-slate-100 transition-colors duration-200 mt-2 text-xs font-semibold text-slate-700 group"
           >
             <div className="flex items-center gap-2">
-              <FileJson className="w-4 h-4 text-indigo-500" />
+              <FileJson className="w-4 h-4 text-emerald-500" />
               <span>Raw OpenAPI JSON Document</span>
             </div>
             <ArrowUpRight className="w-4 h-4 text-slate-450 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
@@ -179,7 +179,7 @@ export default function DeveloperDocs() {
             </div>
             <div className="flex items-center gap-2">
               <span className={`text-xs font-bold px-3 py-1 rounded-full font-mono ${
-                selectedService.method === 'GET' ? 'bg-emerald-100 text-emerald-700' : 'bg-indigo-100 text-indigo-700'
+                selectedService.method === 'GET' ? 'bg-emerald-100 text-emerald-700' : 'bg-emerald-100 text-emerald-700'
               }`}>
                 {selectedService.method}
               </span>
@@ -223,7 +223,7 @@ export default function DeveloperDocs() {
               {/* Optional api_key param listing */}
               {selectedService.method === 'GET' && (
                 <div className="grid grid-cols-12 p-3 border-b border-slate-100 text-slate-650 items-center">
-                  <div className="col-span-3 font-mono font-bold text-indigo-650">api_key</div>
+                  <div className="col-span-3 font-mono font-bold text-emerald-600">api_key</div>
                   <div className="col-span-2">string</div>
                   <div className="col-span-2 text-red-500 font-semibold">Yes</div>
                   <div className="col-span-5">Your Dizipay workspace API key.</div>
@@ -231,7 +231,7 @@ export default function DeveloperDocs() {
               )}
               {selectedService.key === 'PAN_TRACK' && (
                 <div className="grid grid-cols-12 p-3 border-b border-slate-100 text-slate-650 items-center">
-                  <div className="col-span-3 font-mono font-bold text-indigo-650">api_key</div>
+                  <div className="col-span-3 font-mono font-bold text-emerald-600">api_key</div>
                   <div className="col-span-2">string</div>
                   <div className="col-span-2 text-red-500 font-semibold">Yes</div>
                   <div className="col-span-5">Your Dizipay workspace API key.</div>
@@ -295,7 +295,7 @@ export default function DeveloperDocs() {
                   onClick={() => setCodeTab(tab.id)}
                   className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition-all ${
                     codeTab === tab.id
-                      ? 'bg-violet-600 text-white shadow-sm'
+                      ? 'bg-emerald-600 text-white shadow-sm'
                       : 'text-slate-650 hover:bg-slate-50'
                   }`}
                 >

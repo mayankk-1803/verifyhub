@@ -1,6 +1,11 @@
 import { create } from 'zustand';
 import api from '../lib/api';
+import { useDashboardStore } from './dashboardStore';
 const axios = api;
+
+const clearDashboardSession = () => {
+  useDashboardStore.getState().clearCache();
+};
 
 export const useAuthStore = create((set, get) => ({
   user: JSON.parse(localStorage.getItem('vh_user')) || null,
@@ -19,6 +24,7 @@ export const useAuthStore = create((set, get) => ({
       localStorage.setItem('vh_token', accessToken);
       localStorage.setItem('vh_refresh_token', refreshToken);
       localStorage.setItem('vh_user', JSON.stringify(user));
+      clearDashboardSession();
 
       // Attach header globally
       axios.defaults.headers.common['Authorization'] = `Bearer ${accessToken}`;
@@ -60,6 +66,7 @@ export const useAuthStore = create((set, get) => ({
       localStorage.setItem('vh_token', accessToken);
       localStorage.setItem('vh_refresh_token', refreshToken);
       localStorage.setItem('vh_user', JSON.stringify(user));
+      clearDashboardSession();
 
       axios.defaults.headers.common['Authorization'] = `Bearer ${accessToken}`;
 
@@ -93,6 +100,7 @@ export const useAuthStore = create((set, get) => ({
       localStorage.setItem('vh_token', accessToken);
       localStorage.setItem('vh_refresh_token', refreshToken);
       localStorage.setItem('vh_user', JSON.stringify(user));
+      clearDashboardSession();
 
       axios.defaults.headers.common['Authorization'] = `Bearer ${accessToken}`;
 
@@ -127,6 +135,7 @@ export const useAuthStore = create((set, get) => ({
       localStorage.removeItem('vh_user');
 
       delete axios.defaults.headers.common['Authorization'];
+      clearDashboardSession();
 
       set({
         user: null,

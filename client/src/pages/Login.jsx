@@ -86,10 +86,10 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-[100dvh] flex items-center justify-center p-6 relative bg-gradient-to-br from-slate-50 via-white to-violet-50 overflow-hidden">
+    <div className="min-h-[100dvh] flex items-center justify-center p-6 relative bg-gradient-to-br from-slate-50 via-white to-emerald-50 overflow-hidden">
       {/* Background radial overlays */}
-      <div className="absolute top-1/4 left-1/4 w-72 h-72 rounded-full bg-violet-400/10 blur-[100px]" />
-      <div className="absolute bottom-1/4 right-1/4 w-72 h-72 rounded-full bg-blue-400/10 blur-[100px]" />
+      <div className="absolute top-1/4 left-1/4 w-72 h-72 rounded-full bg-emerald-400/10 blur-[100px]" />
+      <div className="absolute bottom-1/4 right-1/4 w-72 h-72 rounded-full bg-teal-400/10 blur-[100px]" />
 
       <div className="w-full max-w-md relative z-10">
         <div className="text-center mb-8">
@@ -111,7 +111,7 @@ export default function Login() {
             }}
             className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-full text-xs font-bold font-display transition-all ${
               loginMethod === 'email'
-                ? 'bg-white text-violet-600 shadow-sm'
+                ? 'bg-white text-emerald-600 shadow-sm'
                 : 'text-slate-500 hover:text-slate-900'
             }`}
           >
@@ -126,7 +126,7 @@ export default function Login() {
             }}
             className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-full text-xs font-bold font-display transition-all ${
               loginMethod === 'phone'
-                ? 'bg-white text-violet-600 shadow-sm'
+                ? 'bg-white text-emerald-600 shadow-sm'
                 : 'text-slate-500 hover:text-slate-900'
             }`}
           >
@@ -173,10 +173,10 @@ export default function Login() {
               />
 
               <div className="flex justify-between items-center text-xs mb-2 ml-1">
-                <Link to="/forgot-password" className="text-violet-600 hover:text-violet-700 font-semibold hover:underline">Forgot password?</Link>
+                <Link to="/forgot-password" className="text-emerald-600 hover:text-emerald-700 font-semibold hover:underline">Forgot password?</Link>
               </div>
 
-              <ClayButton type="submit" variant="primary" disabled={loading} className="w-full py-3.5 flex justify-center items-center bg-violet-600 hover:bg-violet-700 text-white font-semibold shadow-xl shadow-violet-500/30 hover:scale-105 transition-all">
+              <ClayButton type="submit" variant="primary" disabled={loading} className="w-full py-3.5 flex justify-center items-center bg-emerald-600 hover:bg-emerald-700 text-white font-semibold shadow-xl shadow-emerald-500/30 hover:scale-105 transition-all">
                 {loading ? 'Authenticating...' : 'Sign In with Password'}
               </ClayButton>
             </form>
@@ -211,7 +211,7 @@ export default function Login() {
                         setOtp('');
                         setLocalMessage(null);
                       }}
-                      className="text-violet-600 hover:text-violet-700 font-semibold hover:underline"
+                      className="text-emerald-600 hover:text-emerald-700 font-semibold hover:underline"
                     >
                       Change phone number
                     </button>
@@ -226,7 +226,7 @@ export default function Login() {
                 </div>
               )}
 
-              <ClayButton type="submit" variant="primary" disabled={loading} className="w-full py-3.5 flex justify-center items-center bg-violet-600 hover:bg-violet-700 text-white font-semibold shadow-xl shadow-violet-500/30 hover:scale-105 transition-all">
+              <ClayButton type="submit" variant="primary" disabled={loading} className="w-full py-3.5 flex justify-center items-center bg-emerald-600 hover:bg-emerald-700 text-white font-semibold shadow-xl shadow-emerald-500/30 hover:scale-105 transition-all">
                 {loading ? 'Processing...' : (otpSent ? 'Verify OTP & Login' : 'Send Verification OTP')}
               </ClayButton>
             </form>
@@ -234,7 +234,7 @@ export default function Login() {
 
           <div className="mt-6 pt-6 border-t border-slate-100 text-center text-xs text-slate-500">
             New to Dizipay?{' '}
-            <Link to="/register" className="text-violet-600 hover:text-violet-700 hover:underline font-bold">Start building now</Link>
+            <Link to="/register" className="text-emerald-600 hover:text-emerald-700 hover:underline font-bold">Start building now</Link>
           </div>
         </ClayCard>
       </div>

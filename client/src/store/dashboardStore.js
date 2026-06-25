@@ -11,7 +11,7 @@ const activeRequests = {
   tickets: false
 };
 
-export const useDashboardStore = create((set, get) => ({
+const emptyDashboardData = {
   balance: 0,
   stats: {
     totalRequests: 0,
@@ -26,15 +26,26 @@ export const useDashboardStore = create((set, get) => ({
   apiKeys: [],
   webhooks: [],
   tickets: [],
-
   lastFetchedDashboard: 0,
   lastFetchedWallet: 0,
   lastFetchedKeys: 0,
   lastFetchedWebhooks: 0,
   lastFetchedTickets: 0,
-
   loading: {},
-  errors: {},
+  errors: {}
+};
+
+const resetActiveRequests = () => {
+  activeRequests.dashboard = false;
+  activeRequests.wallet = false;
+  activeRequests.keys = false;
+  activeRequests.webhooks = false;
+  activeRequests.tickets = false;
+};
+
+export const useDashboardStore = create((set, get) => ({
+  ownerUserId: null,
+  ...emptyDashboardData,
 
   fetchDashboardData: async (force = false) => {
     if (activeRequests.dashboard || get().loading.dashboard) {
@@ -208,22 +219,16 @@ export const useDashboardStore = create((set, get) => ({
   setTickets: (tickets) => set({ tickets }),
   setBalance: (balance) => set({ balance }),
 
-  clearCache: () => set({
-    balance: 0,
-    stats: { totalRequests: 0, successRate: 100, avgLatencyMs: 0, activeKeys: 0 },
-    chartTrends: [],
-    pieData: [],
-    transactions: [],
-    invoices: [],
-    apiKeys: [],
-    webhooks: [],
-    tickets: [],
-    lastFetchedDashboard: 0,
-    lastFetchedWallet: 0,
-    lastFetchedKeys: 0,
-    lastFetchedWebhooks: 0,
-    lastFetchedTickets: 0,
-    loading: {},
-    errors: {}
-  })
+  setCurrentUser: (userId) => {
+    const nextUserId = userId || null;
+    if (get().ownerUserId === nextUserId) return false;
+    resetActiveRequests();
+    set({ ...emptyDashboardData, ownerUserId: nextUserId });
+    return true;
+  },
+
+  clearCache: () => {
+    resetActiveRequests();
+    set({ ...emptyDashboardData, ownerUserId: null });
+  }
 }));

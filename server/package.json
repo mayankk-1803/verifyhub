@@ -6,6 +6,7 @@
   "scripts": {
     "start": "node src/server.js",
     "dev": "nodemon src/server.js",
+    "verify:registration-wallet": "node scripts/verify-registration-wallet-default.js",
     "db:migrate": "prisma migrate dev",
     "db:seed": "prisma db seed"
   },

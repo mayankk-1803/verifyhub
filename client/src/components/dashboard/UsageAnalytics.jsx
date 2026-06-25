@@ -34,7 +34,7 @@ export default function UsageAnalytics({ COLORS }) {
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center p-20 min-h-[400px] border border-slate-200 bg-white rounded-[24px] shadow-sm text-center">
-        <RefreshCw className="w-10 h-10 text-violet-650 animate-spin mb-4" />
+        <RefreshCw className="w-10 h-10 text-emerald-600 animate-spin mb-4" />
         <h4 className="text-base font-bold text-slate-800 font-display">Loading Analytics Portal</h4>
         <p className="text-xs text-slate-500 mt-1 max-w-sm">Retrieving API usage data, latencies, and service distributions...</p>
       </div>

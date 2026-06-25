@@ -2,11 +2,32 @@ import React, { useState, useEffect } from 'react';
 import { useAuthStore } from '../store/authStore';
 import { useNavigate, Link } from 'react-router-dom';
 import { ClayCard, ClayButton, ClayInput } from '../components/Claymorphic';
-import { ShieldCheck, KeyRound, AlertTriangle, Zap, CheckCircle2, XCircle, RefreshCw } from 'lucide-react';
+import { ShieldCheck, KeyRound, AlertTriangle, CheckCircle2, XCircle, RefreshCw, BadgeCheck, LayoutDashboard, FileText, MapPin, UserCheck } from 'lucide-react';
+import BrandLogo from '../components/BrandLogo';
 import api from '../lib/api';
 const axios = api;
 
 import { API_BASE_URL } from '../config/api';
+
+const cleanDisplayValue = (value) => {
+  if (value === null || value === undefined) return '';
+  const text = String(value).trim();
+  if (!text || text === '-' || text === '—' || text.toLowerCase() === 'null' || text.toLowerCase() === 'undefined') return '';
+  return text;
+};
+
+const bestLocationFrom = (details = {}, fallback = {}) => cleanDisplayValue(details.village) || cleanDisplayValue(fallback.aadhaarVillage) || cleanDisplayValue(details.district) || cleanDisplayValue(fallback.aadhaarDistrict) || cleanDisplayValue(details.address) || cleanDisplayValue(fallback.aadhaarAddress);
+
+const DetailPill = ({ label, value }) => {
+  const displayValue = cleanDisplayValue(value);
+  if (!displayValue) return null;
+  return (
+    <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+      <span className="block text-[10px] font-black uppercase tracking-wider text-slate-400">{label}</span>
+      <p className="mt-1 break-words text-sm font-bold text-slate-900">{displayValue}</p>
+    </div>
+  );
+};
 
 const getPhotoSrc = (photoUrl) => {
   if (!photoUrl) {
@@ -49,7 +70,7 @@ export default function KycVerification() {
       return { text: 'Rejected', color: 'bg-rose-500 text-white shadow-rose-500/20' };
     }
     if (aadhaarVer || level === 'AADHAAR_VERIFIED') {
-      return { text: 'Aadhaar Verified', color: 'bg-blue-500 text-white shadow-blue-500/20' };
+      return { text: 'Aadhaar Verified', color: 'bg-emerald-500 text-white shadow-emerald-500/20' };
     }
     if (level === 'AADHAAR_OTP_SENT') {
       return { text: 'Aadhaar OTP Sent', color: 'bg-amber-500 text-white shadow-amber-500/20' };
@@ -77,6 +98,25 @@ export default function KycVerification() {
   const [maskedAadhaar, setMaskedAadhaar] = useState('');
   const [isRejected, setIsRejected] = useState(false);
   const [rejectionRemarks, setRejectionRemarks] = useState('');
+
+  const otpDigits = Array.from({ length: 6 }, (_, index) => otp[index] || '');
+  const successLocation = bestLocationFrom(aadhaarDetails || {}, user || {});
+
+  const handleOtpDigitChange = (index, value) => {
+    const digit = value.replace(/\D/g, '').slice(-1);
+    const nextDigits = [...otpDigits];
+    nextDigits[index] = digit;
+    setOtp(nextDigits.join(''));
+    if (digit && index < 5) {
+      document.getElementById(`aadhaar-otp-${index + 1}`)?.focus();
+    }
+  };
+
+  const handleOtpKeyDown = (index, event) => {
+    if (event.key === 'Backspace' && !otpDigits[index] && index > 0) {
+      document.getElementById(`aadhaar-otp-${index - 1}`)?.focus();
+    }
+  };
 
   // Timer countdown hook
   useEffect(() => {
@@ -379,24 +419,19 @@ export default function KycVerification() {
             <div className="text-[8px] font-bold text-slate-500 leading-none mt-0.5">Unique Identification Authority of India</div>
           </div>
         </div>
-        <div className="flex items-center gap-1.5 bg-blue-50 border border-blue-100 rounded-lg px-2 py-0.5">
-          <span className="text-[8px] font-black text-blue-700 uppercase tracking-wider">Aadhaar Portal</span>
+        <div className="flex items-center gap-1.5 bg-emerald-50 border border-emerald-100 rounded-lg px-2 py-0.5">
+          <span className="text-[8px] font-black text-emerald-700 uppercase tracking-wider">Aadhaar Portal</span>
         </div>
       </div>
     </div>
   );
 
   return (
-    <div className="min-h-[100dvh] flex items-center justify-center p-6 relative bg-gradient-to-br from-slate-50 via-white to-violet-50 overflow-hidden">
-      {/* Background circles */}
-      <div className="absolute top-1/4 left-1/4 w-72 h-72 rounded-full bg-violet-400/10 blur-[100px] pointer-events-none" />
-      <div className="absolute bottom-1/4 right-1/4 w-72 h-72 rounded-full bg-blue-400/5 blur-[100px] pointer-events-none" />
-
-      <div className="w-full max-w-xl relative z-10">
+    <div className="min-h-[100dvh] flex items-center justify-center p-4 sm:p-6 relative bg-[linear-gradient(180deg,#F8FAFC_0%,#ECFDF5_100%)] overflow-x-hidden">
+      <div className="w-full max-w-4xl relative z-10">
         <div className="text-center mb-8">
           <Link to="/" className="inline-flex items-center justify-center gap-3 mb-2 hover:opacity-90 transition-opacity">
-            <Zap className="h-8 w-8 text-violet-600 animate-pulse" />
-            <span className="text-3xl font-black text-slate-900 font-display">Dizipay</span>
+            <BrandLogo imageClassName="h-10 w-auto object-contain" textClassName="text-3xl font-black text-slate-900 font-display" forceText />
           </Link>
           <h1 className="text-3xl font-bold text-slate-900 mt-4 mb-2 font-display">KYC Identity Verification</h1>
           <p className="text-slate-600 text-sm">Complete standard Aadhaar OTP validation to unlock full platform operations.</p>
@@ -415,25 +450,25 @@ export default function KycVerification() {
               return (
                 <div key={s.step} className="flex flex-col items-center flex-1 relative">
                   {s.step > 1 && (
-                    <div className={`absolute top-5 -left-1/2 right-1/2 h-0.5 pointer-events-none ${activeStep >= s.step ? 'bg-violet-600' : 'bg-slate-200'}`} />
+                    <div className={`absolute top-5 -left-1/2 right-1/2 h-0.5 pointer-events-none ${activeStep >= s.step ? 'bg-emerald-600' : 'bg-slate-200'}`} />
                   )}
                   <div className={`w-10 h-10 rounded-full flex items-center justify-center border-2 transition-all duration-300 ${
-                    isActive ? 'bg-violet-600 border-violet-600 text-white shadow-lg shadow-violet-500/20' :
+                    isActive ? 'bg-emerald-600 border-emerald-600 text-white shadow-lg shadow-emerald-500/20' :
                     isCompleted ? 'bg-emerald-500 border-emerald-500 text-white' :
                     'bg-white border-slate-200 text-slate-400'
                   }`}>
                     {isCompleted ? <CheckCircle2 className="w-5 h-5" /> : <Icon className="w-5 h-5" />}
                   </div>
-                  <span className={`text-xs mt-2 font-bold font-display ${isActive ? 'text-violet-600' : 'text-slate-500'}`}>{s.label}</span>
+                  <span className={`text-xs mt-2 font-bold font-display ${isActive ? 'text-emerald-600' : 'text-slate-500'}`}>{s.label}</span>
                 </div>
               );
             })}
           </div>
         )}
 
-        <ClayCard className="p-0 border border-slate-200 shadow-[0_20px_60px_-15px_rgba(15,23,42,0.15)] bg-white/95 backdrop-blur-xl rounded-3xl text-left overflow-hidden">
+        <ClayCard className="p-0 border border-emerald-100 shadow-[0_28px_90px_-24px_rgba(15,23,42,0.28)] bg-white/95 backdrop-blur-xl rounded-[28px] text-left overflow-hidden">
           <GovtBanner />
-          <div className="p-8">
+          <div className="p-5 sm:p-8">
             {/* Status Badge */}
             <div className="flex items-center justify-between mb-6 pb-4 border-b border-slate-100">
               <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest">Verification Progress</span>
@@ -471,97 +506,86 @@ export default function KycVerification() {
                   <Link to="/" className="flex-1 py-3 text-slate-700 border border-slate-200 text-xs font-bold rounded-full text-center hover:bg-slate-50 transition-all flex justify-center items-center">
                     Back to Home
                   </Link>
-                  <ClayButton onClick={handleRetryKyc} disabled={loading} variant="primary" className="flex-[2] py-3 text-xs bg-violet-600 text-white font-bold hover:bg-violet-750">
+                  <ClayButton onClick={handleRetryKyc} disabled={loading} variant="primary" className="flex-[2] py-3 text-xs bg-emerald-600 text-white font-bold hover:bg-emerald-700">
                     {loading ? 'Restarting...' : 'Retry KYC Verification'}
                   </ClayButton>
                 </div>
               </div>
             ) : activeStep === 3 ? (
-              <div className="flex flex-col gap-6 text-center py-4 font-sans animate-fade-in">
-                <div className="relative mx-auto w-20 h-20 flex items-center justify-center rounded-full bg-emerald-100">
-                  <CheckCircle2 className="w-12 h-12 text-emerald-500 animate-pulse" />
-                </div>
-                <div>
-                  <h3 className="text-lg font-bold text-slate-900 font-display">✓ KYC Verification Approved</h3>
-                  <p className="text-slate-500 text-xs mt-1">Your account identity profile is verified and active.</p>
+<div className="flex flex-col gap-6 py-2 font-sans animate-fade-in">
+                <div className="rounded-[24px] border border-emerald-200 bg-emerald-50 p-5 text-center">
+                  <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-emerald-600 text-white shadow-lg shadow-emerald-600/20">
+                    <BadgeCheck className="h-9 w-9" />
+                  </div>
+                  <h3 className="mt-4 text-2xl font-black tracking-tight text-slate-950">Identity Verified</h3>
+                  <p className="mt-1 text-sm font-medium text-emerald-800">Your Aadhaar KYC is approved and your Dizipay workspace is active.</p>
                 </div>
 
                 {aadhaarDetails && (
-                  <div className="p-5 bg-gradient-to-br from-slate-50 to-slate-100/50 border border-slate-200 rounded-2xl text-left flex flex-col gap-5">
-                    
-                    {/* Aadhaar Photo Section */}
-                    <div className="flex flex-col items-center sm:flex-row gap-5 pb-4 border-b border-slate-200/60 w-full">
-                      <div className="w-24 h-28 shrink-0 relative bg-white rounded-xl border border-slate-200 p-1 shadow-sm">
-                        <img 
-                          src={getPhotoSrc(aadhaarDetails.photo)} 
-                          alt="Verified Aadhaar Portrait" 
-                          className="w-full h-full object-cover rounded-lg"
-                          style={{ display: aadhaarDetails.photo ? 'block' : 'none' }}
-                          onError={(e) => { 
-                            e.target.src = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%2394a3b8'><path d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z'/></svg>"; 
-                          }}
-                        />
-                        {!aadhaarDetails.photo && (
-                          <div className="w-full h-full rounded-lg bg-violet-50 flex flex-col items-center justify-center text-center p-2">
-                            <span className="text-[10px] font-black text-violet-700 uppercase tracking-tighter leading-none">Verified Aadhaar</span>
-                            <span className="text-[8px] text-violet-400 font-bold mt-1">User</span>
-                          </div>
-                        )}
-                      </div>
-                      <div className="flex-1 w-full text-center sm:text-left">
-                        <span className="text-[9px] font-extrabold text-emerald-600 bg-emerald-50 border border-emerald-100 rounded-md px-2 py-0.5 inline-block uppercase tracking-wider mb-2">UIDAI Authenticated</span>
-                        <h4 className="text-base font-bold text-slate-800">{aadhaarDetails.name}</h4>
-                        <div className="grid grid-cols-2 gap-2 mt-2 text-xs">
-                          <div>
-                            <span className="text-slate-400 font-bold text-[10px] uppercase">DOB</span>
-                            <p className="text-slate-700 font-semibold">{aadhaarDetails.dob}</p>
-                          </div>
-                          <div>
-                            <span className="text-slate-400 font-bold text-[10px] uppercase">Gender</span>
-                            <p className="text-slate-700 font-semibold">{aadhaarDetails.gender}</p>
-                          </div>
+                  <div className="grid grid-cols-1 gap-4 lg:grid-cols-[1.1fr_0.9fr]">
+                    <div className="rounded-[24px] border border-slate-200 bg-white p-5 shadow-sm">
+                      <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
+                        <div className="h-28 w-24 shrink-0 overflow-hidden rounded-2xl border border-slate-200 bg-slate-50 p-1 shadow-sm">
+                          <img
+                            src={getPhotoSrc(aadhaarDetails.photo)}
+                            alt="Verified Aadhaar Portrait"
+                            className="h-full w-full rounded-xl object-cover"
+                            onError={(e) => {
+                              e.target.src = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%2394a3b8'><path d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z'/></svg>";
+                            }}
+                          />
                         </div>
+                        <div className="min-w-0 flex-1">
+                          <span className="inline-flex items-center gap-1 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-[10px] font-black uppercase tracking-wider text-emerald-700">
+                            <UserCheck className="h-3 w-3" /> UIDAI Authenticated
+                          </span>
+                          <h4 className="mt-3 break-words text-xl font-black text-slate-950">{cleanDisplayValue(aadhaarDetails.name) || user?.name || 'Verified User'}</h4>
+                          <p className="mt-1 text-xs font-semibold text-slate-500">KYC Level: {user?.kycLevel || 'AADHAAR_VERIFIED'}</p>
+                        </div>
+                      </div>
+                      <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2">
+                        <DetailPill label="Date of Birth" value={aadhaarDetails.dob} />
+                        <DetailPill label="Gender" value={aadhaarDetails.gender} />
+                        <DetailPill label="District" value={aadhaarDetails.district || user?.aadhaarDistrict} />
+                        <DetailPill label="State" value={aadhaarDetails.state || user?.aadhaarState} />
                       </div>
                     </div>
 
-                    {/* Aadhaar Demographics Section */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
-                      <div>
-                        <span className="text-slate-400 font-bold text-[10px] uppercase block">Father Name</span>
-                        <p className="text-slate-800 font-bold">{aadhaarDetails.fatherName || user?.aadhaarFatherName || '-'}</p>
+                    <div className="flex flex-col gap-4">
+                      <div className="rounded-[24px] border border-slate-200 bg-white p-5 shadow-sm">
+                        <div className="flex items-center gap-2 text-sm font-black text-slate-950">
+                          <MapPin className="h-4 w-4 text-emerald-600" /> Address Card
+                        </div>
+                        <p className="mt-3 text-sm font-semibold leading-6 text-slate-700">{cleanDisplayValue(aadhaarDetails.address) || cleanDisplayValue(user?.aadhaarAddress) || successLocation}</p>
+                        <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-1">
+                          <DetailPill label="Village / Town" value={successLocation} />
+                          <DetailPill label="Pincode" value={aadhaarDetails.pincode || user?.aadhaarPincode} />
+                        </div>
                       </div>
-                      <div>
-                        <span className="text-slate-400 font-bold text-[10px] uppercase block">Village / Town</span>
-                        <p className="text-slate-800 font-bold">{aadhaarDetails.village || user?.aadhaarVillage || '-'}</p>
-                      </div>
-                      <div>
-                        <span className="text-slate-400 font-bold text-[10px] uppercase block">District</span>
-                        <p className="text-slate-800 font-bold">{aadhaarDetails.district || user?.aadhaarDistrict || '-'}</p>
-                      </div>
-                      <div>
-                        <span className="text-slate-400 font-bold text-[10px] uppercase block">State</span>
-                        <p className="text-slate-800 font-bold">{aadhaarDetails.state || user?.aadhaarState || '-'}</p>
-                      </div>
-                      <div>
-                        <span className="text-slate-400 font-bold text-[10px] uppercase block">Pincode</span>
-                        <p className="text-slate-800 font-bold">{aadhaarDetails.pincode || user?.aadhaarPincode || '-'}</p>
-                      </div>
-                      <div>
-                        <span className="text-slate-400 font-bold text-[10px] uppercase block">Country</span>
-                        <p className="text-slate-800 font-bold">{aadhaarDetails.country || user?.aadhaarCountry || '-'}</p>
-                      </div>
-                      <div className="sm:col-span-2">
-                        <span className="text-slate-400 font-bold text-[10px] uppercase block">Full Address</span>
-                        <p className="text-slate-800 font-bold leading-relaxed">{aadhaarDetails.address || '-'}</p>
+
+                      <div className="rounded-[24px] border border-slate-200 bg-white p-5 shadow-sm">
+                        <div className="text-sm font-black text-slate-950">Verification Metadata</div>
+                        <div className="mt-4 space-y-3 text-xs font-semibold text-slate-600">
+                          <div className="flex justify-between gap-4"><span>KYC Level</span><strong className="text-slate-950">AADHAAR_VERIFIED</strong></div>
+                          <div className="flex justify-between gap-4"><span>Verification Time</span><strong className="text-right text-slate-950">{aadhaarDetails.approvedAt ? new Date(aadhaarDetails.approvedAt).toLocaleString() : new Date().toLocaleString()}</strong></div>
+                          <div className="flex justify-between gap-4"><span>Status</span><strong className="text-emerald-700">APPROVED</strong></div>
+                        </div>
                       </div>
                     </div>
                   </div>
                 )}
 
-                <div className="w-full h-px bg-slate-100 my-1" />
-                <Link to="/dashboard" className="w-full py-3.5 bg-violet-600 hover:bg-violet-750 text-white text-xs font-bold rounded-full text-center shadow-lg hover:scale-[1.02] transition-all">
-                  Go To Dashboard
-                </Link>
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+                  <Link to="/dashboard/profile" className="inline-flex items-center justify-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-3 text-xs font-black text-slate-800 shadow-sm hover:bg-slate-50">
+                    <FileText className="h-4 w-4" /> Certificate
+                  </Link>
+                  <Link to="/dashboard/profile" className="inline-flex items-center justify-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-4 py-3 text-xs font-black text-emerald-800 shadow-sm hover:bg-emerald-100">
+                    <UserCheck className="h-4 w-4" /> Profile
+                  </Link>
+                  <Link to="/dashboard" className="inline-flex items-center justify-center gap-2 rounded-full bg-emerald-600 px-4 py-3 text-xs font-black text-white shadow-lg shadow-emerald-500/20 hover:bg-emerald-700">
+                    <LayoutDashboard className="h-4 w-4" /> Dashboard
+                  </Link>
+                </div>
               </div>
             ) : activeStep === 1 ? (
               <form onSubmit={handleSendAadhaarOtp} className="flex flex-col gap-5">
@@ -605,7 +629,7 @@ export default function KycVerification() {
                   </div>
                 </div>
 
-                <div className="p-4 bg-violet-50 border border-violet-100 rounded-2xl text-xs font-medium text-violet-700 leading-relaxed">
+                <div className="p-4 bg-emerald-50 border border-emerald-100 rounded-2xl text-xs font-medium text-emerald-700 leading-relaxed">
                   ℹ️ Submit your 12-digit Aadhaar Card number to send a verification OTP to your linked mobile device.
                 </div>
 
@@ -620,14 +644,14 @@ export default function KycVerification() {
                   disabled={loading}
                 />
 
-                <ClayButton type="submit" variant="primary" disabled={loading} className="w-full py-3.5 flex justify-center items-center bg-violet-600 hover:bg-violet-750 text-white font-bold shadow-xl shadow-violet-500/30 hover:scale-[1.02] transition-all">
+                <ClayButton type="submit" variant="primary" disabled={loading} className="w-full py-3.5 flex justify-center items-center bg-emerald-600 hover:bg-emerald-700 text-white font-bold shadow-xl shadow-emerald-500/30 hover:scale-[1.02] transition-all">
                   {loading ? 'Sending OTP...' : 'Send OTP'}
                 </ClayButton>
               </form>
             ) : (
               <form onSubmit={handleVerifyAadhaarDetails} className="flex flex-col gap-5">
                 {/* Aadhaar card showing user name & masked number */}
-                <div className="relative w-full rounded-2xl bg-gradient-to-br from-blue-50/70 via-white to-slate-50 border border-slate-200/80 p-5 shadow-sm overflow-hidden flex flex-col justify-between min-h-[140px]">
+                <div className="relative w-full rounded-2xl bg-gradient-to-br from-emerald-50/70 via-white to-slate-50 border border-slate-200/80 p-5 shadow-sm overflow-hidden flex flex-col justify-between min-h-[140px]">
                   <div className="flex justify-between items-start">
                     <div>
                       <span className="text-[9px] font-extrabold text-slate-400 uppercase tracking-wider">Aadhaar Registration Details</span>
@@ -644,26 +668,36 @@ export default function KycVerification() {
                   </div>
                 </div>
 
-                <div className="p-4 bg-violet-50 border border-violet-100 rounded-2xl text-xs font-medium text-violet-700 leading-relaxed">
+                <div className="p-4 bg-emerald-50 border border-emerald-100 rounded-2xl text-xs font-medium text-emerald-700 leading-relaxed">
                   ℹ️ Enter the 6-digit OTP sent to your Aadhaar-registered mobile number to complete verification.
                 </div>
 
-                <ClayInput
-                  label="Enter Verification OTP *"
-                  type="text"
-                  value={otp}
-                  onChange={(e) => setOtp(e.target.value.replace(/\D/g, ''))}
-                  placeholder="e.g. 123456"
-                  maxLength={6}
-                  required
-                  disabled={loading}
-                />
+<div>
+                  <label className="mb-3 block text-xs font-black uppercase tracking-wider text-slate-500">Enter Verification OTP *</label>
+                  <div className="grid grid-cols-6 gap-2 sm:gap-3">
+                    {otpDigits.map((digit, index) => (
+                      <input
+                        key={index}
+                        id={`aadhaar-otp-${index}`}
+                        type="text"
+                        inputMode="numeric"
+                        maxLength={1}
+                        value={digit}
+                        onChange={(e) => handleOtpDigitChange(index, e.target.value)}
+                        onKeyDown={(e) => handleOtpKeyDown(index, e)}
+                        disabled={loading}
+                        className="h-12 rounded-2xl border border-slate-200 bg-white text-center text-lg font-black text-slate-950 shadow-sm outline-none transition focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 sm:h-14"
+                        aria-label={`OTP digit ${index + 1}`}
+                      />
+                    ))}
+                  </div>
+                </div>
 
                 {/* Countdown and Resend timer */}
                 <div className="flex justify-between items-center text-xs mt-1 px-1">
                   {timer > 0 ? (
                     <span className="text-slate-500 font-bold">
-                      Resend OTP in <span className="text-violet-600 font-black">{timer}s</span>
+                      Resend OTP in <span className="text-emerald-600 font-black">{timer}s</span>
                     </span>
                   ) : (
                     <span className="text-emerald-600 font-bold">Resend available</span>
@@ -675,7 +709,7 @@ export default function KycVerification() {
                     disabled={loading || !canResend}
                     className={`flex items-center gap-1 font-extrabold uppercase text-[10px] tracking-wider transition-colors ${
                       canResend && !loading
-                        ? 'text-violet-600 hover:text-violet-850'
+                        ? 'text-emerald-600 hover:text-emerald-800'
                         : 'text-slate-400 cursor-not-allowed'
                     }`}
                   >

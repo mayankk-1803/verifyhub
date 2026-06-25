@@ -1,9 +1,11 @@
+import toast from '../lib/toast.jsx';
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import api from '../lib/api';
 import { useServicesStore } from '../store/servicesStore';
 import { ClayCard, ClayButton, ClayBadge, ClayInput } from '../components/Claymorphic';
 import { Shield, Lock, CheckCircle2, AlertTriangle, ArrowLeft, Search, Wallet } from 'lucide-react';
+import BrandLogo from '../components/BrandLogo';
 
 export default function Marketplace() {
   const [services, setServices] = useState([]);
@@ -74,7 +76,7 @@ export default function Marketplace() {
         setServices(updatedServices || []);
       }
     } catch (err) {
-      alert(err.response?.data?.error || err.response?.data?.message || 'Activation failed.');
+      toast.info(err.response?.data?.error || err.response?.data?.message || 'Activation failed.');
     } finally {
       setLoading(false);
     }
@@ -91,35 +93,35 @@ export default function Marketplace() {
   return (
     <div className="min-h-[100dvh] bg-slate-50 text-slate-800 font-sans pb-24 relative overflow-hidden text-left">
       {/* Background radial overlays */}
-      <div className="absolute top-1/4 left-1/4 w-[500px] h-[500px] rounded-full bg-violet-400/5 blur-[120px] pointer-events-none" />
-      <div className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] rounded-full bg-blue-450/5 blur-[120px] pointer-events-none" />
+      <div className="absolute top-1/4 left-1/4 w-[500px] h-[500px] rounded-full bg-emerald-400/5 blur-[120px] pointer-events-none" />
+      <div className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] rounded-full bg-teal-400/5 blur-[120px] pointer-events-none" />
 
       {/* Header bar */}
       <nav className="w-full bg-white/80 backdrop-blur-md border-b border-slate-200 sticky top-0 z-55 py-4 px-6 shadow-sm">
         <div className="max-w-[1440px] mx-auto flex justify-between items-center">
           <Link to="/" className="flex items-center gap-2 hover:opacity-90 transition-opacity">
-            <span className="text-violet-600 text-xl font-bold">⚡</span>
+            <span className="text-emerald-600 text-xl font-bold">⚡</span>
             <span className="text-xl font-black tracking-tight text-slate-900 font-display">Dizipay</span>
           </Link>
           
           <div className="flex items-center gap-6">
             {isLoggedIn && balance !== null && (
-              <div className="hidden sm:flex items-center gap-2 bg-violet-50 border border-violet-100 px-4 py-2 rounded-2xl">
-                <Wallet className="w-4 h-4 text-violet-600" />
+              <div className="hidden sm:flex items-center gap-2 bg-emerald-50 border border-emerald-100 px-4 py-2 rounded-2xl">
+                <Wallet className="w-4 h-4 text-emerald-600" />
                 <span className="text-xs text-slate-500 font-semibold">Wallet:</span>
-                <strong className="text-violet-700 text-xs font-bold font-display">₹{balance.toFixed(2)}</strong>
+                <strong className="text-emerald-700 text-xs font-bold font-display">₹{balance.toFixed(2)}</strong>
               </div>
             )}
 
             {isLoggedIn ? (
               <Link to="/dashboard">
-                <ClayButton variant="primary" className="py-2 px-5 text-xs font-bold bg-violet-600 text-white rounded-full">
+                <ClayButton variant="primary" className="py-2 px-5 text-xs font-bold bg-emerald-600 text-white rounded-full">
                   Go to Dashboard
                 </ClayButton>
               </Link>
             ) : (
               <Link to="/login">
-                <ClayButton variant="primary" className="py-2 px-5 text-xs font-bold bg-violet-600 text-white rounded-full">
+                <ClayButton variant="primary" className="py-2 px-5 text-xs font-bold bg-emerald-600 text-white rounded-full">
                   Sign In
                 </ClayButton>
               </Link>
@@ -131,7 +133,7 @@ export default function Marketplace() {
       {/* Hero section */}
       <div className="max-w-[1440px] mx-auto px-6 pt-12 pb-6">
         <div className="flex flex-col gap-4 text-left">
-          <Link to="/" className="inline-flex items-center gap-1.5 text-xs font-bold text-violet-650 hover:text-violet-750 transition-colors mb-2">
+          <Link to="/" className="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-600 hover:text-emerald-700 transition-colors mb-2">
             <ArrowLeft className="w-3.5 h-3.5" /> Back to Home
           </Link>
           <h1 className="text-4xl font-extrabold text-slate-900 font-display tracking-tight">API Service Marketplace</h1>
@@ -156,7 +158,7 @@ export default function Marketplace() {
                     onChange={(e) => setSearchTerm(e.target.value)}
                     placeholder="Search APIs..."
                     aria-label="Search API catalog"
-                    className="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 focus:border-violet-400 focus:bg-white rounded-xl text-xs outline-none transition-all"
+                    className="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 focus:border-emerald-400 focus:bg-white rounded-xl text-xs outline-none transition-all"
                   />
                   <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
                 </div>
@@ -171,7 +173,7 @@ export default function Marketplace() {
                       onClick={() => setSelectedCategory(c.id)}
                       className={`w-full text-left px-3 py-2 rounded-xl text-xs font-semibold transition-all ${
                         selectedCategory === c.id
-                          ? 'bg-violet-50 text-violet-700 font-bold'
+                          ? 'bg-emerald-50 text-emerald-700 font-bold'
                           : 'text-slate-650 hover:bg-slate-50'
                       }`}
                     >
@@ -204,7 +206,7 @@ export default function Marketplace() {
               <AlertTriangle className="w-10 h-10 text-red-650" />
               <h3 className="text-base font-bold text-slate-900 font-display">Error Loading Marketplace</h3>
               <p className="text-xs text-slate-650">{error}</p>
-              <ClayButton variant="primary" onClick={checkAuthAndFetch} className="py-2.5 px-6 font-semibold bg-violet-600">
+              <ClayButton variant="primary" onClick={checkAuthAndFetch} className="py-2.5 px-6 font-semibold bg-emerald-600">
                 Retry Fetching
               </ClayButton>
             </div>
@@ -215,13 +217,13 @@ export default function Marketplace() {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
               {filteredServices.map((svc) => (
-                <ClayCard key={svc.id} className="cv-card flex flex-col justify-between gap-6 hover:border-violet-300 bg-white shadow-sm border border-slate-200 p-6 rounded-[24px]">
+                <ClayCard key={svc.id} className="cv-card flex flex-col justify-between gap-6 hover:border-emerald-300 bg-white shadow-sm border border-slate-200 p-6 rounded-[24px]">
                   <div className="text-left flex flex-col gap-3">
                     <div className="flex justify-between items-start">
                       <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
                         {svc.category}
                       </span>
-                      <span className="text-[9px] font-bold bg-violet-100 text-violet-700 px-2 py-0.5 rounded font-mono">
+                      <span className="text-[9px] font-bold bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded font-mono">
                         {svc.method}
                       </span>
                     </div>
@@ -238,7 +240,7 @@ export default function Marketplace() {
                       </div>
                       <div className="flex justify-between items-center">
                         <span className="text-slate-400 font-semibold">Per API Request:</span>
-                        <strong className="text-violet-750 font-extrabold text-sm">{svc.price}</strong>
+                        <strong className="text-emerald-700 font-extrabold text-sm">{svc.price}</strong>
                       </div>
                     </div>
 
@@ -256,7 +258,7 @@ export default function Marketplace() {
                         <button
                           onClick={() => handleActivate(svc.id, svc.name)}
                           aria-label={`Unlock and activate ${svc.name}`}
-                          className="w-full py-2.5 text-center text-xs font-bold text-white bg-violet-600 hover:bg-violet-750 rounded-xl shadow-md shadow-violet-500/10 transition-all hover:scale-[1.02] flex items-center justify-center gap-1.5 outline-none"
+                          className="w-full py-2.5 text-center text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 rounded-xl shadow-md shadow-emerald-500/10 transition-all hover:scale-[1.02] flex items-center justify-center gap-1.5 outline-none"
                         >
                           <Lock className="w-3.5 h-3.5" /> Unlock & Activate
                         </button>
@@ -297,7 +299,7 @@ export default function Marketplace() {
                   setShowSuccessModal(false);
                   navigate('/dashboard');
                 }}
-                className="flex-1 py-3 text-xs font-bold bg-violet-600 hover:bg-violet-700 text-white rounded-2xl"
+                className="flex-1 py-3 text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl"
               >
                 Go to Sandbox
               </button>

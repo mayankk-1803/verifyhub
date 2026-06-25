@@ -1,3 +1,4 @@
+import toast from '../lib/toast.jsx';
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../lib/api';
@@ -88,13 +89,13 @@ export default function AdminKycManagement() {
     setActionLoading(true);
     try {
       await api.post(`/api/v1/admin/kyc/${userId}/approve`, { remarks });
-      alert('KYC manually approved successfully.');
+      toast.info('KYC manually approved successfully.');
       setRemarks('');
       setIsDrawerOpen(false);
       setSelectedUser(null);
       fetchKycRequests();
     } catch (err) {
-      alert(err.response?.data?.error || err.response?.data?.message || 'Approval failed.');
+      toast.info(err.response?.data?.error || err.response?.data?.message || 'Approval failed.');
     } finally {
       setActionLoading(false);
     }
@@ -102,20 +103,20 @@ export default function AdminKycManagement() {
 
   const handleReject = async (userId) => {
     if (!remarks) {
-      alert('Remarks are required for KYC rejection.');
+      toast.info('Remarks are required for KYC rejection.');
       return;
     }
     if (!window.confirm('Are you sure you want to manually REJECT this KYC?')) return;
     setActionLoading(true);
     try {
       await api.post(`/api/v1/admin/kyc/${userId}/reject`, { remarks });
-      alert('KYC manually rejected successfully.');
+      toast.info('KYC manually rejected successfully.');
       setRemarks('');
       setIsDrawerOpen(false);
       setSelectedUser(null);
       fetchKycRequests();
     } catch (err) {
-      alert(err.response?.data?.error || err.response?.data?.message || 'Rejection failed.');
+      toast.info(err.response?.data?.error || err.response?.data?.message || 'Rejection failed.');
     } finally {
       setActionLoading(false);
     }
@@ -123,20 +124,20 @@ export default function AdminKycManagement() {
 
   const handleSuspend = async (userId) => {
     if (!remarks) {
-      alert('Remarks are required for KYC suspension.');
+      toast.info('Remarks are required for KYC suspension.');
       return;
     }
     if (!window.confirm('Are you sure you want to manually SUSPEND this user KYC?')) return;
     setActionLoading(true);
     try {
       await api.post(`/api/v1/admin/kyc/${userId}/suspend`, { remarks });
-      alert('KYC manually suspended successfully.');
+      toast.info('KYC manually suspended successfully.');
       setRemarks('');
       setIsDrawerOpen(false);
       setSelectedUser(null);
       fetchKycRequests();
     } catch (err) {
-      alert(err.response?.data?.error || err.response?.data?.message || 'Suspension failed.');
+      toast.info(err.response?.data?.error || err.response?.data?.message || 'Suspension failed.');
     } finally {
       setActionLoading(false);
     }
@@ -144,20 +145,20 @@ export default function AdminKycManagement() {
 
   const handleRequestReverification = async (userId) => {
     if (!remarks) {
-      alert('Remarks are required for KYC reverification.');
+      toast.info('Remarks are required for KYC reverification.');
       return;
     }
     if (!window.confirm('Are you sure you want to request RE-VERIFICATION?')) return;
     setActionLoading(true);
     try {
       await api.post(`/api/v1/admin/kyc/${userId}/reverify`, { remarks });
-      alert('KYC reverification requested successfully.');
+      toast.info('KYC reverification requested successfully.');
       setRemarks('');
       setIsDrawerOpen(false);
       setSelectedUser(null);
       fetchKycRequests();
     } catch (err) {
-      alert(err.response?.data?.error || err.response?.data?.message || 'Request failed.');
+      toast.info(err.response?.data?.error || err.response?.data?.message || 'Request failed.');
     } finally {
       setActionLoading(false);
     }
@@ -169,7 +170,7 @@ export default function AdminKycManagement() {
       setSelectedUser(res.data);
       setIsDrawerOpen(true);
     } catch (err) {
-      alert('Failed to retrieve full user KYC details.');
+      toast.info('Failed to retrieve full user KYC details.');
     }
   };
 
@@ -180,7 +181,7 @@ export default function AdminKycManagement() {
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
           <h1 className="text-xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
-            <Shield className="w-6 h-6 text-violet-600" /> Platform KYC Management
+            <Shield className="w-6 h-6 text-emerald-600" /> Platform KYC Management
           </h1>
           <p className="text-xs text-slate-500 font-medium">Verify, approve, reject, or suspend user KYC milestones.</p>
         </div>
@@ -191,8 +192,8 @@ export default function AdminKycManagement() {
         {[
           { label: 'Total Accounts', val: metrics.total, color: 'text-slate-800', bg: 'bg-slate-50 border-slate-200' },
           { label: 'Pending KYC', val: metrics.pending, color: 'text-amber-600', bg: 'bg-amber-50/50 border-amber-200' },
-          { label: 'Approved KYC', val: metrics.approved, color: 'text-emerald-600', bg: 'bg-emerald-50/50 border-emerald-250' },
-          { label: 'Approval Rate', val: `${metrics.approvalRate}%`, color: 'text-violet-600', bg: 'bg-violet-50/30 border-violet-200' }
+          { label: 'Approved KYC', val: metrics.approved, color: 'text-emerald-600', bg: 'bg-emerald-50/50 border-emerald-200' },
+          { label: 'Approval Rate', val: `${metrics.approvalRate}%`, color: 'text-emerald-600', bg: 'bg-emerald-50/30 border-emerald-200' }
         ].map((m, idx) => (
           <div key={`kyc-metric-${idx}`} className={`p-4 border rounded-[20px] bg-white flex flex-col gap-1 shadow-sm ${m.bg}`}>
             <span className="text-[10px] uppercase font-bold tracking-wider text-slate-400">{m.label}</span>
@@ -211,7 +212,7 @@ export default function AdminKycManagement() {
               placeholder="Search user name, email, phone, PAN, Aadhaar..."
               value={searchInput}
               onChange={(e) => setSearchInput(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-slate-250 rounded-full text-xs font-semibold font-sans bg-slate-50 focus:bg-white focus:border-violet-600 outline-none transition-all"
+              className="w-full pl-10 pr-4 py-2 border border-slate-250 rounded-full text-xs font-semibold font-sans bg-slate-50 focus:bg-white focus:border-emerald-600 outline-none transition-all"
             />
             <button type="submit" className="hidden" />
           </div>
@@ -257,7 +258,7 @@ export default function AdminKycManagement() {
       <ClayCard className="border border-slate-200 shadow-sm rounded-[24px] bg-white p-0 overflow-hidden">
         {loading ? (
           <div className="flex flex-col items-center justify-center p-16">
-            <div className="w-8 h-8 border-4 border-violet-600 border-t-transparent rounded-full animate-spin mb-4" />
+            <div className="w-8 h-8 border-4 border-emerald-600 border-t-transparent rounded-full animate-spin mb-4" />
             <span className="text-xs font-bold text-slate-400">Loading KYC requests list...</span>
           </div>
         ) : users.length === 0 ? (
@@ -291,7 +292,7 @@ export default function AdminKycManagement() {
                   return (
                     <tr key={`user-row-${user.id}`} className="hover:bg-slate-50/50 transition-colors">
                       <td 
-                        className="px-6 py-4 font-bold text-slate-900 hover:text-violet-650 hover:underline cursor-pointer text-left" 
+                        className="px-6 py-4 font-bold text-slate-900 hover:text-emerald-600 hover:underline cursor-pointer text-left" 
                         onClick={() => navigate(`/admin/users/${user.id}`)}
                       >
                         {user.name || '—'}
@@ -320,7 +321,7 @@ export default function AdminKycManagement() {
                         <button
                           type="button"
                           onClick={() => openUserDrawer(user)}
-                          className="inline-flex h-9 items-center justify-center gap-1.5 rounded-full border border-violet-200 bg-violet-50 px-3.5 text-[11px] font-bold text-violet-700 shadow-sm transition-colors hover:border-violet-300 hover:bg-violet-100 focus:outline-none focus:ring-2 focus:ring-violet-500/30"
+                          className="inline-flex h-9 items-center justify-center gap-1.5 rounded-full border border-emerald-200 bg-emerald-50 px-3.5 text-[11px] font-bold text-emerald-700 shadow-sm transition-colors hover:border-emerald-300 hover:bg-emerald-100 focus:outline-none focus:ring-2 focus:ring-emerald-500/30"
                         >
                           <Eye className="w-3.5 h-3.5" /> Details
                         </button>
@@ -350,7 +351,7 @@ export default function AdminKycManagement() {
             <div className="p-6 border-b border-slate-150 flex justify-between items-center bg-slate-50/50">
               <div className="flex flex-col">
                 <h2 className="text-base font-bold font-display text-slate-900 flex items-center gap-2">
-                  <Shield className="w-5 h-5 text-violet-600" /> KYC Application Audit Record
+                  <Shield className="w-5 h-5 text-emerald-600" /> KYC Application Audit Record
                 </h2>
                 <p className="text-xs text-slate-500 font-mono mt-0.5">{selectedUser.email || selectedUser.phone}</p>
               </div>
@@ -494,7 +495,7 @@ export default function AdminKycManagement() {
                     setSelectedUser(null);
                     navigate(`/admin/users/${selectedUser.id}`);
                   }}
-                  className="border-blue-200 text-blue-700 bg-blue-50 hover:bg-blue-100 text-xs px-3.5 py-2 flex items-center gap-1.5 h-[36px]"
+                  className="border-emerald-200 text-emerald-700 bg-emerald-50 hover:bg-emerald-100 text-xs px-3.5 py-2 flex items-center gap-1.5 h-[36px]"
                 >
                   <Eye className="w-4 h-4" /> Inspect Account
                 </ClayButton>
@@ -522,7 +523,7 @@ export default function AdminKycManagement() {
                 <ClayButton 
                   onClick={() => handleApprove(selectedUser.id)}
                   disabled={actionLoading}
-                  className="border-emerald-600 text-white bg-emerald-600 hover:bg-emerald-750 text-xs px-3.5 py-2 flex items-center gap-1.5 h-[36px]"
+                  className="border-emerald-600 text-white bg-emerald-600 hover:bg-emerald-700 text-xs px-3.5 py-2 flex items-center gap-1.5 h-[36px]"
                 >
                   <UserCheck className="w-4 h-4" /> Approve KYC
                 </ClayButton>

@@ -52,7 +52,7 @@ export default function WalletBilling({
                 {invoices.map((inv) => (
                   <tr key={inv.id} className="hover:bg-slate-50 transition-colors">
                     <td className="px-6 py-4 font-mono font-bold text-xs text-slate-900">{inv.invoiceNumber}</td>
-                    <td className="px-6 py-4 font-extrabold text-violet-600">₹{parseFloat(inv.amount).toFixed(2)}</td>
+                    <td className="px-6 py-4 font-extrabold text-emerald-600">₹{parseFloat(inv.amount).toFixed(2)}</td>
                     <td className="px-6 py-4 text-xs text-slate-500 font-sans">{new Date(inv.createdAt).toLocaleDateString()}</td>
                     <td className="px-6 py-4">
                       <button
@@ -77,7 +77,7 @@ export default function WalletBilling({
                   </div>
                   <div className="flex justify-between items-center text-xs">
                     <span className="text-slate-500 font-medium">Amount:</span>
-                    <strong className="text-violet-650 font-extrabold text-sm">₹{parseFloat(inv.amount).toFixed(2)}</strong>
+                    <strong className="text-emerald-600 font-extrabold text-sm">₹{parseFloat(inv.amount).toFixed(2)}</strong>
                   </div>
                   <button
                     onClick={() => copyToClipboard(inv.fileUrl)}

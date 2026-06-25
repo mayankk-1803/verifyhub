@@ -10,7 +10,7 @@ export const ClayCard = React.memo(({ children, className = '', onClick, ...prop
       whileHover={onClick ? { y: -6, scale: 1.01 } : { y: -4 }}
       transition={{ type: 'spring', stiffness: 300, damping: 20 }}
       onClick={onClick}
-      className={`bg-white border border-border shadow-clay-card hover:shadow-clay-card-hover rounded-clay p-6 text-text-primary transition-all duration-300 ${onClick ? 'cursor-pointer' : ''} ${className}`}
+      className={`bg-white/95 dark:bg-charcoal-surface border border-slate-200/80 dark:border-slate-700 shadow-clay-card hover:shadow-clay-card-hover rounded-clay p-6 text-text-primary dark:text-slate-50 transition-all duration-300 backdrop-blur-sm ${onClick ? 'cursor-pointer' : ''} ${className}`}
       {...props}
     >
       {children}
@@ -40,9 +40,9 @@ export const WalletCard = React.memo(({ children, ...props }) => (
 export const ClayButton = ({ children, variant = 'primary', className = '', onClick, type = 'button', disabled = false, ...props }) => {
   const themes = {
     primary: 'bg-primary text-white shadow-clay-primary hover:shadow-clay-primary-hover hover:bg-primary-hover',
-    secondary: 'bg-white border border-border text-text-secondary shadow-clay-card hover:bg-background hover:text-text-primary',
+    secondary: 'bg-white border border-slate-200 text-slate-700 shadow-sm hover:bg-emerald-50 hover:text-emerald-800 hover:border-emerald-200',
     accent: 'bg-accent text-white font-bold shadow-clay-accent hover:bg-accent-hover',
-    danger: 'bg-red-500 text-white shadow-[0_12px_24px_rgba(239,68,68,0.2),inset_0_2px_4px_rgba(255,255,255,0.4),inset_0_-6px_12px_rgba(0,0,0,0.2)] hover:bg-red-600'
+    danger: 'bg-danger text-white shadow-[0_12px_24px_rgba(239,68,68,0.20)] hover:bg-red-600'
   };
 
   return (
@@ -52,7 +52,7 @@ export const ClayButton = ({ children, variant = 'primary', className = '', onCl
       onClick={onClick}
       type={type}
       disabled={disabled}
-      className={`rounded-full px-6 py-3 font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary/50 disabled:opacity-40 disabled:cursor-not-allowed ${themes[variant]} ${className}`}
+      className={`rounded-full px-6 py-3 font-bold transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary/50 disabled:opacity-40 disabled:cursor-not-allowed ${themes[variant]} ${className}`}
       {...props}
     >
       {children}
@@ -72,7 +72,7 @@ export const ClayInput = ({ label, className = '', ...props }) => {
         </label>
       )}
       <input
-        className={`w-full bg-white text-slate-900 placeholder:text-slate-400 rounded-full px-5 py-3 border border-slate-300 shadow-clay-input focus:shadow-clay-input-focus focus:border-violet-500 focus:ring-2 focus:ring-violet-500/20 transition-all duration-300 outline-none ${className}`}
+        className={`w-full bg-white dark:bg-charcoal-surface text-slate-900 dark:text-slate-50 placeholder:text-slate-400 rounded-full px-5 py-3 border border-slate-300 dark:border-slate-700 shadow-clay-input focus:shadow-clay-input-focus focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 transition-all duration-300 outline-none ${className}`}
         {...props}
       />
     </div>
@@ -95,7 +95,7 @@ export const ClayModal = ({ isOpen, onClose, title, children, className = '' }) 
         initial={{ opacity: 0, scale: 0.9, y: 20 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.9, y: 20 }}
-        className={`relative z-10 w-full max-w-lg bg-white border border-border shadow-clay-card-hover rounded-clay-lg p-8 max-h-[90vh] overflow-y-auto ${className}`}
+        className={`relative z-10 w-full max-w-lg bg-white dark:bg-charcoal-surface border border-slate-200 dark:border-slate-700 shadow-clay-card-hover rounded-clay-lg p-8 max-h-[90vh] overflow-y-auto ${className}`}
       >
         <div className="flex justify-between items-center mb-6">
           <h3 className="text-xl font-bold font-display text-text-primary">{title}</h3>
@@ -117,7 +117,7 @@ export const ClayModal = ({ isOpen, onClose, title, children, className = '' }) 
  */
 export const ClaySidebar = ({ children, className = '' }) => {
   return (
-    <aside className={`bg-white border-r border-border p-6 flex flex-col justify-between h-[100dvh] w-64 fixed left-0 top-0 z-30 overflow-y-auto overflow-x-hidden overscroll-contain [scrollbar-width:thin] shadow-[10px_0_30px_rgba(15,23,42,0.02)] ${className}`}>
+    <aside className={`bg-white/95 dark:bg-charcoal-surface border-r border-slate-200 dark:border-slate-800 p-6 flex flex-col justify-between backdrop-blur-xl h-[100dvh] w-64 fixed left-0 top-0 z-30 overflow-y-auto overflow-x-hidden overscroll-contain [scrollbar-width:thin] shadow-[10px_0_30px_rgba(15,23,42,0.02)] ${className}`}>
       {children}
     </aside>
   );
@@ -185,7 +185,7 @@ export const ClayBadge = ({ status, children }) => {
     ERROR: 'bg-red-500/10 border-red-500/20 text-red-600',
     REVOKED: 'bg-red-500/10 border-red-500/20 text-red-600',
     PENDING: 'bg-yellow-500/15 border-yellow-500/30 text-yellow-600',
-    PROCESSING: 'bg-blue-500/15 border-blue-500/30 text-blue-600',
+    PROCESSING: 'bg-teal-500/15 border-teal-500/30 text-teal-600',
     REVERSED: 'bg-purple-500/15 border-purple-500/30 text-purple-600'
   };
 

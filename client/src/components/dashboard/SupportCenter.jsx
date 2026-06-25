@@ -35,7 +35,7 @@ export default function SupportCenter({
               <div className="w-full mb-4">
                 <label className="block text-xs font-semibold text-slate-700 mb-2 font-display ml-2">Description</label>
                 <textarea
-                  className="w-full bg-white text-slate-900 rounded-[16px] p-4 border border-slate-300 shadow-sm outline-none text-xs focus:border-violet-500 focus:ring-2 focus:ring-violet-500/20 transition-all duration-300"
+                  className="w-full bg-white text-slate-900 rounded-[16px] p-4 border border-slate-300 shadow-sm outline-none text-xs focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all duration-300"
                   rows="4"
                   value={newTicketDesc}
                   onChange={(e) => setNewTicketDesc(e.target.value)}

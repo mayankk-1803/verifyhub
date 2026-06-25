@@ -42,6 +42,7 @@ import {
 } from '../components/Claymorphic';
 import ErrorBoundary from '../components/ErrorBoundary';
 import BrandLogo from '../components/BrandLogo';
+import toast, { sanitizeToastError } from '../lib/toast.jsx';
 
 // Skeleton screen loader for individual tabs
 function TabSkeleton() {
@@ -137,6 +138,7 @@ export default function Dashboard() {
     setWebhooks,
     setTickets,
     setBalance,
+    setCurrentUser,
     loading: storeLoading,
     errors: storeErrors
   } = useDashboardStore();
@@ -164,6 +166,7 @@ export default function Dashboard() {
   const [playgroundInputs, setPlaygroundInputs] = useState({});
   const [playLoading, setPlayLoading] = useState(false);
   const [playResponse, setPlayResponse] = useState(null);
+  const [playMeta, setPlayMeta] = useState(null);
   const [servicesList, setServicesList] = useState([]);
 
   // Modals visibility state
@@ -259,26 +262,45 @@ export default function Dashboard() {
     }
   }, [isProfileModalOpen]);
 
-  const [toastMessage, setToastMessage] = useState('');
-  const toastTimeoutRef = useRef(null);
-
-  const showToast = (msg) => {
-    setToastMessage(msg);
-    if (toastTimeoutRef.current) {
-      clearTimeout(toastTimeoutRef.current);
-    }
-    toastTimeoutRef.current = setTimeout(() => {
-      setToastMessage('');
-    }, 3000);
+  const showToast = (msg, type = 'info') => {
+    const notify = toast[type] || toast.info;
+    notify(msg);
   };
 
-  useEffect(() => {
-    return () => {
-      if (toastTimeoutRef.current) {
-        clearTimeout(toastTimeoutRef.current);
-      }
-    };
-  }, []);
+  const getLoadingToast = (serviceKey) => {
+    if (/AADHAAR/.test(serviceKey)) return 'Verifying Aadhaar...';
+    if (/PAN/.test(serviceKey)) return 'Checking PAN...';
+    if (/GST/.test(serviceKey)) return 'Fetching GST details...';
+    return 'Sending request...';
+  };
+
+  const validatePlaygroundInput = (serviceKey, field, rawValue) => {
+    const value = String(rawValue || '').trim().toUpperCase();
+    const fieldName = String(field.name || '').toLowerCase();
+    const label = field.label || field.name;
+    if (field.required && !value) return label + ' is required';
+    if (!value) return '';
+
+    if (fieldName.includes('aadhaar') || fieldName.includes('aadhar')) {
+      return /^\d{12}$/.test(value.replace(/\D/g, '')) ? '' : 'Aadhaar must be exactly 12 digits';
+    }
+    if (fieldName.includes('pan')) {
+      return /^[A-Z]{5}[0-9]{4}[A-Z]$/.test(value) ? '' : 'PAN must match ABCDE1234F format';
+    }
+    if (fieldName.includes('gst')) {
+      return /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z][1-9A-Z]Z[0-9A-Z]$/.test(value) ? '' : 'GSTIN must be a valid 15-character GST number';
+    }
+    if (fieldName.includes('epic') || fieldName.includes('voter')) {
+      return /^[A-Z]{3}[0-9]{7}$/.test(value) ? '' : 'Voter ID must match ABC1234567 format';
+    }
+    if (fieldName.includes('ration')) {
+      return value.replace(/\s/g, '').length >= 6 ? '' : 'Ration card number must be at least 6 characters';
+    }
+    if (serviceKey === 'PAN_DECODE' && fieldName.includes('enc')) {
+      return value.length >= 8 ? '' : 'Encoded PAN payload is too short';
+    }
+    return '';
+  };
 
   // Sync API default auth header and fetch initial minimal dashboard summary
   useEffect(() => {
@@ -286,15 +308,16 @@ export default function Dashboard() {
       navigate('/login');
     } else {
       axios.defaults.headers.common['Authorization'] = `Bearer ${accessToken}`;
+      const userChanged = setCurrentUser(user?.id || null);
       const isApproved = user?.kycStatus === 'KYC_APPROVED' || user?.kycStatus === 'APPROVED' || isAdmin;
       if (isApproved && !storeLoading?.dashboard) {
-        fetchDashboardData().catch(err => {
+        fetchDashboardData(userChanged).catch(err => {
           console.error('Failed to load initial dashboard stats:', err);
         });
       }
       fetchNotifications();
     }
-  }, [accessToken, user?.kycStatus, isAdmin]);
+  }, [accessToken, user?.id, user?.kycStatus, isAdmin, setCurrentUser]);
 
   // Route Guard to redirect non-KYC users away from restricted tabs
   useEffect(() => {
@@ -351,8 +374,13 @@ export default function Dashboard() {
   // Sync playground inputs when the target service changes
   useEffect(() => {
     setPlayResponse(null);
+    setPlayMeta(null);
     if (servicesList.length > 0) {
-      const activeService = servicesList.find(s => s.key === verifyService);
+      const activeService = servicesList.find(s => s.key === verifyService) || servicesList[0];
+      if (activeService?.key && activeService.key !== verifyService) {
+        setVerifyService(activeService.key);
+        return;
+      }
       if (activeService) {
         const initial = {};
         activeService.inputFields.forEach(f => {
@@ -497,32 +525,44 @@ export default function Dashboard() {
   // Interactive Playground trigger
   const handleVerifyPlayground = async (e) => {
     e.preventDefault();
+    if (playLoading) return;
 
     const serviceDef = servicesList.find(s => s.key === verifyService);
-    if (!serviceDef) return;
+    if (!serviceDef) {
+      toast.error('Unable to process request');
+      return;
+    }
 
-    for (const field of serviceDef.inputFields) {
-      const val = (playgroundInputs[field.name] || '').trim();
-      if (field.required && !val) {
-        showToast(`${field.label || field.name} is required`);
+    for (const field of serviceDef.inputFields || []) {
+      const validationMessage = validatePlaygroundInput(serviceDef.key, field, playgroundInputs[field.name]);
+      if (validationMessage) {
+        toast.error(validationMessage);
         return;
       }
     }
 
-    setPlayLoading(true);
-    setPlayResponse(null);
-
     const activeKey = apiKeys.find(k => k.status === 'ACTIVE');
     if (!activeKey && !isAdmin) {
-      setPlayLoading(false);
-      showToast('Please generate an active API key first before calling verifications.');
+      toast.error('Please generate an active API key first before calling verifications.');
       return;
     }
 
     const requestKey = activeKey ? activeKey.key : 'admin_sandbox_bypass_key';
+    const startedAt = performance.now();
+    const loadingToastId = toast.loading(getLoadingToast(serviceDef.key));
+
+    setPlayLoading(true);
+    setPlayResponse(null);
+    setPlayMeta({
+      serviceKey: serviceDef.key,
+      endpoint: serviceDef.endpoint,
+      method: serviceDef.method,
+      startedAt: new Date().toISOString(),
+      status: 'loading'
+    });
 
     try {
-      let options = {
+      const options = {
         headers: { 'x-api-key': requestKey }
       };
 
@@ -533,7 +573,7 @@ export default function Dashboard() {
         serviceDef.inputFields.forEach(field => {
           queryParams.append(field.name, playgroundInputs[field.name] || '');
         });
-        res = await axios.get(`${serviceDef.endpoint}?${queryParams.toString()}`, options);
+        res = await axios.get(serviceDef.endpoint + '?' + queryParams.toString(), options);
       } else {
         const postBody = {};
         if (verifyService === 'PAN_TRACK') {
@@ -545,14 +585,41 @@ export default function Dashboard() {
         res = await axios.post(serviceDef.endpoint, postBody, options);
       }
 
+      const durationMs = Math.max(1, Math.round(performance.now() - startedAt));
       setPlayResponse(res.data);
-      // Refresh balance
-      const balRes = await axios.get('/api/v1/wallet');
-      if (balRes.data.success) setBalance(balRes.data.balance);
-      showToast('Verification query processed!');
+      setPlayMeta({
+        serviceKey: serviceDef.key,
+        endpoint: serviceDef.endpoint,
+        method: serviceDef.method,
+        timestamp: new Date().toISOString(),
+        durationMs,
+        status: res.data?.success === false ? 'failed' : 'success',
+        provider: res.data?.provider || res.data?.providerNode || res.data?.data?.provider || 'gateway'
+      });
+
+      axios.get('/api/v1/wallet')
+        .then((balRes) => {
+          if (balRes.data.success) setBalance(balRes.data.balance);
+        })
+        .catch(() => {});
+
+      toast.dismiss(loadingToastId);
+      toast.success('API response received');
     } catch (err) {
-      setPlayResponse(err.response?.data || { error: { message: err.message || 'Verification transaction failed.' } });
-      showToast('Verification failed.');
+      const durationMs = Math.max(1, Math.round(performance.now() - startedAt));
+      const safeMessage = sanitizeToastError(err, 'Verification failed');
+      setPlayResponse(err.response?.data || { success: false, error: { message: safeMessage } });
+      setPlayMeta({
+        serviceKey: serviceDef.key,
+        endpoint: serviceDef.endpoint,
+        method: serviceDef.method,
+        timestamp: new Date().toISOString(),
+        durationMs,
+        status: 'failed',
+        provider: err.response?.data?.provider || 'gateway'
+      });
+      toast.dismiss(loadingToastId);
+      toast.error(safeMessage);
     } finally {
       setPlayLoading(false);
     }
@@ -589,13 +656,6 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-[100dvh] lg:pl-64 pl-0 bg-background text-text selection:bg-primary selection:text-white font-sans antialiased overflow-x-hidden relative">
-      {/* Toast Notification */}
-      {toastMessage && (
-        <div className="fixed bottom-8 right-8 z-50 px-6 py-3.5 bg-white border border-slate-200 shadow-xl rounded-full text-xs font-semibold text-slate-900 animate-bounce">
-          ⚡ {toastMessage}
-        </div>
-      )}
-
       {/* Backdrop overlay for mobile drawer */}
       {isDrawerOpen && (
         <div
@@ -632,7 +692,7 @@ export default function Dashboard() {
                   aria-label={`Open ${item.label} tab`}
                   className={`w-full flex items-center gap-4 px-4 py-3 rounded-full text-sm font-semibold font-display transition-colors duration-200 ${
                     activeTab === item.id
-                      ? 'bg-violet-600 text-white'
+                      ? 'bg-emerald-600 text-white'
                       : 'text-slate-655 hover:bg-slate-100'
                   }`}
                 >
@@ -650,7 +710,7 @@ export default function Dashboard() {
                   aria-label="Open User Management controls"
                   className={`w-full flex items-center gap-4 px-4 py-3 rounded-full text-sm font-semibold font-display mt-4 border h-[44px] transition-colors duration-200 ${
                     activeTab === 'admin'
-                      ? 'bg-emerald-600 text-white border-emerald-600 hover:bg-emerald-750'
+                      ? 'bg-emerald-600 text-white border-emerald-600 hover:bg-emerald-700'
                       : 'border-green-200 bg-green-50 text-green-700 hover:bg-green-100'
                   }`}
                 >
@@ -662,8 +722,8 @@ export default function Dashboard() {
                   aria-label="Open KYC Management controls"
                   className={`w-full flex items-center gap-4 px-4 py-3 rounded-full text-sm font-semibold font-display mt-2 border h-[44px] transition-colors duration-200 ${
                     activeTab === 'admin-kyc'
-                      ? 'bg-violet-600 text-white border-violet-650'
-                      : 'border-violet-250 bg-violet-50 text-violet-700 hover:bg-violet-100'
+                      ? 'bg-emerald-600 text-white border-emerald-600'
+                      : 'border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100'
                   }`}
                 >
                   <Shield className="w-4.5 h-4.5 shrink-0" aria-hidden="true" />
@@ -679,7 +739,7 @@ export default function Dashboard() {
           <div className="flex items-center justify-between w-full gap-1">
             {isAdmin ? (
               <div className="flex items-center gap-3 text-left p-1.5 rounded-2xl border border-transparent flex-1 min-w-0 animate-fade-in select-none">
-                <div className="w-10 h-10 rounded-full bg-violet-600 text-white flex items-center justify-center font-bold shrink-0">
+                <div className="w-10 h-10 rounded-full bg-emerald-600 text-white flex items-center justify-center font-bold shrink-0">
                   {user?.email ? user.email[0].toUpperCase() : 'A'}
                 </div>
                 <div className="flex flex-col min-w-0 flex-1">
@@ -693,7 +753,7 @@ export default function Dashboard() {
                 className="flex items-center gap-3 text-left hover:bg-slate-50 p-1.5 rounded-2xl transition-all duration-200 cursor-pointer outline-none border border-transparent hover:border-slate-200 flex-1 min-w-0 animate-fade-in"
                 aria-label="View user profile and KYC history"
               >
-                <div className="w-10 h-10 rounded-full bg-violet-600 text-white flex items-center justify-center font-bold shrink-0" aria-hidden="true">
+                <div className="w-10 h-10 rounded-full bg-emerald-600 text-white flex items-center justify-center font-bold shrink-0" aria-hidden="true">
                   {user?.email ? user.email[0].toUpperCase() : 'U'}
                 </div>
                 <div className="flex flex-col min-w-0 flex-1">
@@ -787,7 +847,7 @@ export default function Dashboard() {
                     {unreadCount > 0 && (
                       <button
                         onClick={handleMarkAllRead}
-                        className="text-[10px] font-bold text-violet-600 hover:text-violet-750 hover:underline uppercase tracking-wide"
+                        className="text-[10px] font-bold text-emerald-600 hover:text-emerald-700 hover:underline uppercase tracking-wide"
                       >
                         Mark all read
                       </button>
@@ -808,17 +868,17 @@ export default function Dashboard() {
                             <div className="flex flex-col gap-4 text-xs">
                               {kycNotifs.length > 0 && (
                                 <div className="flex flex-col gap-2">
-                                  <span className="text-[10px] font-bold text-violet-650 uppercase tracking-wider">KYC Verification Alerts</span>
+                                  <span className="text-[10px] font-bold text-emerald-600 uppercase tracking-wider">KYC Verification Alerts</span>
                                   {kycNotifs.map(n => (
                                     <div
                                       key={n.id}
                                       onClick={() => !n.isRead && handleMarkRead(n.id)}
                                       className={`p-3 border rounded-2xl transition-all cursor-pointer text-left relative flex flex-col gap-1 ${
-                                        n.isRead ? 'bg-slate-50/50 border-slate-150' : 'bg-violet-50/20 border-violet-100/50 hover:bg-violet-50/40'
+                                        n.isRead ? 'bg-slate-50/50 border-slate-150' : 'bg-emerald-50/20 border-emerald-100/50 hover:bg-emerald-50/40'
                                       }`}
                                     >
                                       {!n.isRead && (
-                                        <span className="absolute top-3 right-3 h-2 w-2 rounded-full bg-violet-600 animate-pulse" />
+                                        <span className="absolute top-3 right-3 h-2 w-2 rounded-full bg-emerald-600 animate-pulse" />
                                       )}
                                       <div className="flex justify-between items-start pr-4">
                                         <strong className="text-[11px] text-slate-800 font-display">{n.title}</strong>
@@ -838,11 +898,11 @@ export default function Dashboard() {
                                       key={n.id}
                                       onClick={() => !n.isRead && handleMarkRead(n.id)}
                                       className={`p-3 border rounded-2xl transition-all cursor-pointer text-left relative flex flex-col gap-1 ${
-                                        n.isRead ? 'bg-slate-50/50 border-slate-150' : 'bg-violet-50/20 border-violet-100/50 hover:bg-violet-50/40'
+                                        n.isRead ? 'bg-slate-50/50 border-slate-150' : 'bg-emerald-50/20 border-emerald-100/50 hover:bg-emerald-50/40'
                                       }`}
                                     >
                                       {!n.isRead && (
-                                        <span className="absolute top-3 right-3 h-2 w-2 rounded-full bg-violet-600 animate-pulse" />
+                                        <span className="absolute top-3 right-3 h-2 w-2 rounded-full bg-emerald-600 animate-pulse" />
                                       )}
                                       <div className="flex justify-between items-start pr-4">
                                         <strong className="text-[11px] text-slate-800 font-display">{n.title}</strong>
@@ -908,6 +968,7 @@ export default function Dashboard() {
                       setPlaygroundInputs={setPlaygroundInputs}
                       playLoading={playLoading}
                       playResponse={playResponse}
+                      playMeta={playMeta}
                       handleVerifyPlayground={handleVerifyPlayground}
                       handleActivateService={handleActivateService}
                     />
@@ -1084,7 +1145,7 @@ export default function Dashboard() {
           <div className="w-full">
             <label className="block text-xs font-semibold text-slate-700 mb-2 font-display ml-1">Details description</label>
             <textarea
-              className="w-full bg-white text-slate-900 rounded-[16px] p-4 border border-slate-300 shadow-sm outline-none text-xs focus:border-violet-500 focus:ring-2 focus:ring-violet-500/20 transition-all duration-300"
+              className="w-full bg-white text-slate-900 rounded-[16px] p-4 border border-slate-300 shadow-sm outline-none text-xs focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all duration-300"
               rows="4"
               value={newTicketDesc}
               onChange={(e) => setNewTicketDesc(e.target.value)}
@@ -1133,7 +1194,7 @@ export default function Dashboard() {
                 }}
               />
               <div 
-                className="w-24 h-28 rounded-xl bg-violet-100 border border-violet-200 flex items-center justify-center text-violet-600 font-bold text-xl uppercase"
+                className="w-24 h-28 rounded-xl bg-emerald-100 border border-emerald-200 flex items-center justify-center text-emerald-600 font-bold text-xl uppercase"
                 style={{ display: (fullKycData?.aadhaarPhotoUrl || user?.aadhaarPhotoUrl) ? 'none' : 'flex' }}
               >
                 {(fullKycData?.aadhaarName || user?.aadhaarName || user?.name || 'US').slice(0, 2)}
@@ -1221,7 +1282,7 @@ export default function Dashboard() {
                 {kycHistory.map((h) => (
                   <div key={h.id} className="relative group text-left">
                     {/* Node Bullet Dot */}
-                    <span className="absolute -left-[31px] top-1.5 flex h-4 w-4 items-center justify-center rounded-full border-2 border-white bg-slate-300 ring-4 ring-slate-100 group-hover:bg-violet-500 group-hover:ring-violet-100 transition-all duration-300">
+                    <span className="absolute -left-[31px] top-1.5 flex h-4 w-4 items-center justify-center rounded-full border-2 border-white bg-slate-300 ring-4 ring-slate-100 group-hover:bg-emerald-500 group-hover:ring-emerald-100 transition-all duration-300">
                       <span className="h-1.5 w-1.5 rounded-full bg-white" />
                     </span>
                     {/* Node Info */}

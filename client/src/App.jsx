@@ -13,6 +13,7 @@ const Marketplace = lazy(() => import('./pages/Marketplace'));
 const KycVerification = lazy(() => import('./pages/KycVerification'));
 
 import ErrorBoundary from './components/ErrorBoundary';
+import { Toaster } from './lib/toast.jsx';
 
 // Reusable screen skeleton for page route transitions
 function PageLoader() {
@@ -27,6 +28,7 @@ function PageLoader() {
 export default function App() {
   return (
     <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+      <Toaster />
       <Suspense fallback={<PageLoader />}>
         <Routes>
           <Route path="/" element={<LandingPage />} />

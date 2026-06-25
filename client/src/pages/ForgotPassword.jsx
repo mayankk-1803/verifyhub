@@ -31,10 +31,10 @@ export default function ForgotPassword() {
   };
 
   return (
-    <div className="min-h-[100dvh] flex items-center justify-center p-6 relative bg-gradient-to-br from-slate-50 via-white to-violet-50 overflow-hidden">
+    <div className="min-h-[100dvh] flex items-center justify-center p-6 relative bg-gradient-to-br from-slate-50 via-white to-emerald-50 overflow-hidden">
       {/* Background radial overlays */}
-      <div className="absolute top-1/4 left-1/4 w-72 h-72 rounded-full bg-violet-400/10 blur-[100px]" />
-      <div className="absolute bottom-1/4 right-1/4 w-72 h-72 rounded-full bg-blue-400/10 blur-[100px]" />
+      <div className="absolute top-1/4 left-1/4 w-72 h-72 rounded-full bg-emerald-400/10 blur-[100px]" />
+      <div className="absolute bottom-1/4 right-1/4 w-72 h-72 rounded-full bg-teal-400/10 blur-[100px]" />
 
       <div className="w-full max-w-md relative z-10">
         <div className="text-center mb-8">
@@ -67,13 +67,13 @@ export default function ForgotPassword() {
                 placeholder="e.g. name@company.com"
                 required
               />
-              <ClayButton type="submit" variant="primary" disabled={loading} className="w-full py-3.5 flex justify-center items-center bg-violet-600 hover:bg-violet-700 text-white font-semibold shadow-xl shadow-violet-500/30 hover:scale-105 transition-all">
+              <ClayButton type="submit" variant="primary" disabled={loading} className="w-full py-3.5 flex justify-center items-center bg-emerald-600 hover:bg-emerald-700 text-white font-semibold shadow-xl shadow-emerald-500/30 hover:scale-105 transition-all">
                 {loading ? 'Processing...' : 'Send Recovery Email'}
               </ClayButton>
             </form>
           ) : (
             <div className="flex flex-col gap-4">
-              <div className="bg-slate-50 p-4 rounded-2xl text-center border border-slate-200 font-mono text-violet-700 font-bold select-all text-sm shadow-sm">
+              <div className="bg-slate-50 p-4 rounded-2xl text-center border border-slate-200 font-mono text-emerald-700 font-bold select-all text-sm shadow-sm">
                 {token}
               </div>
               <div className="text-xs text-slate-500 text-center leading-relaxed">
@@ -86,7 +86,7 @@ export default function ForgotPassword() {
           )}
 
           <div className="mt-6 pt-6 border-t border-slate-100 text-center text-xs text-slate-500">
-            <Link to="/login" className="text-violet-600 hover:text-violet-700 hover:underline font-bold">Back to Sign In</Link>
+            <Link to="/login" className="text-emerald-600 hover:text-emerald-700 hover:underline font-bold">Back to Sign In</Link>
           </div>
         </ClayCard>
       </div>

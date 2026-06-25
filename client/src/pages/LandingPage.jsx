@@ -684,7 +684,7 @@ export default function LandingPage() {
         scrolled ? 'bg-white/80 border-b border-border shadow-sm backdrop-blur-md' : 'bg-transparent border-b border-transparent'
       }`}>
         <Link to="/" className="flex items-center gap-2 font-display text-xl font-bold tracking-wider text-text-primary" aria-label="Dizipay Home">
-          <img src="/shortlogo.png" className="h-6 w-auto" alt="Dizipay Logo" loading="lazy" /> Dizipay
+          <img src="/greenshortlogo.png" className="h-7 w-auto object-contain" alt="Dizipay Logo" loading="lazy" /> Dizipay
         </Link>
         <div className="hidden md:flex items-center gap-8 text-sm font-semibold text-text-secondary">
           <a href="#demo" className="hover:text-primary transition-colors focus:ring-2 focus:ring-primary/30 outline-none rounded px-2 py-1">Sandbox Demo</a>
@@ -710,10 +710,10 @@ export default function LandingPage() {
             {/* Left Side: Copywriting */}
             <div ref={titleRef} className="flex flex-col gap-6 text-left relative z-10 max-w-[780px]">
               <div className="inline-flex hero-animate">
-                <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-violet-50 border border-violet-200 text-violet-700 text-xs font-semibold tracking-wide shadow-sm">
+                <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs font-semibold tracking-wide shadow-sm">
                   <span className="relative flex h-2 w-2">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-violet-400 opacity-75"></span>
-                    <span className="relative inline-flex rounded-full h-2 w-2 bg-violet-600"></span>
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-600"></span>
                   </span>
                   Enterprise Verification Infrastructure
                 </div>
@@ -721,7 +721,7 @@ export default function LandingPage() {
               
               <h1 className="text-5xl md:text-7xl xl:text-8xl font-black leading-[0.9] tracking-tight text-slate-900 hero-animate">
                 Enterprise Verification <br />
-                <span className="bg-gradient-to-r from-violet-700 via-indigo-600 to-blue-500 bg-clip-text text-transparent">
+                <span className="bg-gradient-to-r from-emerald-700 via-emerald-600 to-teal-500 bg-clip-text text-transparent">
                   Infrastructure
                 </span>
               </h1>
@@ -737,10 +737,10 @@ export default function LandingPage() {
                   whileTap={{ scale: 0.98 }}
                   className="relative group rounded-full"
                 >
-                  <div className="absolute -inset-1 bg-gradient-to-r from-violet-600 to-indigo-600 rounded-full blur opacity-25 group-hover:opacity-75 transition duration-1000 group-hover:duration-200" />
+                  <div className="absolute -inset-1 bg-gradient-to-r from-emerald-600 to-emerald-600 rounded-full blur opacity-25 group-hover:opacity-75 transition duration-1000 group-hover:duration-200" />
                   
                   <Link to="/register" className="relative block" aria-label="Start Building sandbox account">
-                    <button className="bg-violet-600 hover:bg-violet-700 text-white font-semibold shadow-xl shadow-violet-500/30 flex items-center gap-2 px-8 py-4 text-base rounded-full transition-all focus:ring-2 focus:ring-violet-500/50 outline-none">
+                    <button className="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold shadow-xl shadow-emerald-500/30 flex items-center gap-2 px-8 py-4 text-base rounded-full transition-all focus:ring-2 focus:ring-emerald-500/50 outline-none">
                       Start Building <Play className="w-4 h-4 fill-white" aria-hidden="true" />
                     </button>
                   </Link>
@@ -981,7 +981,7 @@ export default function LandingPage() {
                         onClick={() => handleSandboxServiceChange(service.key)}
                         className={`px-3.5 py-2 rounded-full text-[11px] font-bold font-display border transition-all focus:ring-2 focus:ring-primary/30 outline-none ${
                           sandboxService === service.key
-                            ? 'bg-violet-600 text-white border-transparent shadow-md'
+                            ? 'bg-emerald-600 text-white border-transparent shadow-md'
                             : 'bg-background border-border text-text-secondary hover:text-text-primary'
                         }`}
                       >
@@ -1146,7 +1146,7 @@ export default function LandingPage() {
               servicesList
                 .filter((api) => ['GST_VERIFY', 'PAN_CARD', 'AADHAAR_OTP', 'BANK_VERIFY', 'VOTER_VERIFY'].includes(api.key))
                 .map((api, idx) => (
-                  <ClayCard key={api.id} className="flex flex-col justify-between gap-6 hover:border-violet-300 bg-white shadow-sm border border-slate-200">
+                  <ClayCard key={api.id} className="flex flex-col justify-between gap-6 hover:border-emerald-300 bg-white shadow-sm border border-slate-200">
                     <div className="text-left flex flex-col gap-4">
                       <div className="flex justify-between items-start">
                         <div>
@@ -1155,7 +1155,7 @@ export default function LandingPage() {
                           </span>
                           <h3 className="text-lg font-bold font-display text-slate-900">{api.name}</h3>
                         </div>
-                        <span className="text-[10px] font-bold bg-violet-100 text-violet-700 px-2 py-0.5 rounded uppercase font-mono">
+                        <span className="text-[10px] font-bold bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded uppercase font-mono">
                           {api.method}
                         </span>
                       </div>
@@ -1180,7 +1180,7 @@ export default function LandingPage() {
                             handleSandboxServiceChange(api.key);
                             document.getElementById('demo')?.scrollIntoView({ behavior: 'smooth' });
                           }}
-                          className="py-2 text-center text-xs font-bold text-white bg-violet-600 hover:bg-violet-700 rounded-lg shadow-sm transition-all outline-none"
+                          className="py-2 text-center text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 rounded-lg shadow-sm transition-all outline-none"
                         >
                           Try API
                         </button>
@@ -1204,7 +1204,7 @@ export default function LandingPage() {
 
           <div className="mt-12 text-center">
             <Link to="/marketplace">
-              <ClayButton variant="primary" className="py-3 px-8 text-sm font-bold bg-violet-600 hover:bg-violet-750 text-white rounded-full shadow-lg shadow-violet-500/20 hover:scale-105 transition-all">
+              <ClayButton variant="primary" className="py-3 px-8 text-sm font-bold bg-emerald-600 hover:bg-emerald-700 text-white rounded-full shadow-lg shadow-emerald-500/20 hover:scale-105 transition-all">
                 View All APIs
               </ClayButton>
             </Link>
@@ -1240,7 +1240,7 @@ export default function LandingPage() {
                       onClick={() => setDxServiceKey(service.key)}
                       className={`flex items-center justify-between p-3 rounded-2xl text-xs font-semibold font-sans transition-all duration-150 border text-left ${
                         dxServiceKey === service.key
-                          ? 'bg-violet-50 text-violet-700 border-violet-200 shadow-sm'
+                          ? 'bg-emerald-50 text-emerald-700 border-emerald-200 shadow-sm'
                           : 'bg-white border-slate-200 text-slate-650 hover:bg-slate-50'
                       }`}
                     >
@@ -1249,7 +1249,7 @@ export default function LandingPage() {
                         <span className="text-[10px] text-slate-400 font-mono mt-0.5 truncate">{service.endpoint}</span>
                       </div>
                       <span className={`text-[8px] font-bold px-1.5 py-0.5 rounded font-mono shrink-0 ${
-                        service.method === 'GET' ? 'bg-emerald-100 text-emerald-700' : 'bg-indigo-100 text-indigo-700'
+                        service.method === 'GET' ? 'bg-emerald-100 text-emerald-700' : 'bg-emerald-100 text-emerald-700'
                       }`}>
                         {service.method}
                       </span>

@@ -8,6 +8,27 @@ import {
 } from 'lucide-react';
 
 import { API_BASE_URL } from '../config/api';
+import toast from '../lib/toast.jsx';
+
+const cleanDisplayValue = (value) => {
+  if (value === null || value === undefined) return '';
+  const text = String(value).trim();
+  if (!text || text === '-' || text === '—' || text.toLowerCase() === 'null' || text.toLowerCase() === 'undefined') return '';
+  return text;
+};
+
+const getBestLocation = (data = {}) => cleanDisplayValue(data.aadhaarVillage) || cleanDisplayValue(data.aadhaarDistrict) || cleanDisplayValue(data.aadhaarAddress);
+
+const FieldItem = ({ label, value, mono = false, children }) => {
+  const displayValue = cleanDisplayValue(value);
+  if (!children && !displayValue) return null;
+  return (
+    <div>
+      <span className="text-slate-500 font-semibold block">{label}</span>
+      {children || <strong className={`text-slate-800 text-sm break-words ${mono ? 'font-mono' : ''}`}>{displayValue}</strong>}
+    </div>
+  );
+};
 
 const getPhotoSrc = (photoUrl) => {
   if (!photoUrl) {
@@ -41,7 +62,7 @@ export default function UserProfilePage() {
   const [refreshing, setRefreshing] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [savingProfile, setSavingProfile] = useState(false);
-  const [editForm, setEditForm] = useState({ name: '', email: '' });
+  const [editForm, setEditForm] = useState({ name: '', email: '', phone: '' });
 
   const fetchProfileDetails = async () => {
     try {
@@ -120,7 +141,8 @@ export default function UserProfilePage() {
   const openEditProfile = () => {
     setEditForm({
       name: profileData?.user?.name || user?.name || displayName || '',
-      email: profileData?.user?.email || user?.email || ''
+      email: profileData?.user?.email || user?.email || '',
+      phone: profileData?.user?.phone || user?.phone || profileData?.phoneNumber || ''
     });
     setShowEditModal(true);
   };
@@ -129,29 +151,35 @@ export default function UserProfilePage() {
     e.preventDefault();
     const name = String(editForm.name || '').trim();
     const email = String(editForm.email || '').trim().toLowerCase();
+    const phone = String(editForm.phone || '').replace(/\D/g, '');
 
     if (name.length < 2) {
-      alert('Name must be at least 2 characters.');
+      toast.info('Name must be at least 2 characters.');
       return;
     }
 
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      alert('Invalid email address.');
+      toast.info('Invalid email address.');
+      return;
+    }
+
+    if (!/^\d{10}$/.test(phone)) {
+      toast.info('Please enter a valid 10-digit mobile number.');
       return;
     }
 
     setSavingProfile(true);
     try {
-      const res = await api.patch('/api/v1/profile', { name, email });
+      const res = await api.patch('/api/v1/profile', { name, email, phone });
       if (res.data.success) {
         updateKycState(res.data.user);
-        setProfileData(prev => prev ? { ...prev, user: { ...prev.user, ...res.data.user } } : prev);
+        setProfileData(prev => prev ? { ...prev, user: { ...prev.user, ...res.data.user }, phoneNumber: res.data.user.phoneNumber || res.data.user.phone } : prev);
         setShowEditModal(false);
         await fetchProfileDetails();
-        alert(res.data.message || 'Profile updated successfully.');
+        toast.info(res.data.message || 'Profile updated successfully.');
       }
     } catch (err) {
-      alert(err.response?.data?.message || 'Failed to update profile.');
+      toast.info(err.response?.data?.message || 'Failed to update profile.');
     } finally {
       setSavingProfile(false);
     }
@@ -274,7 +302,7 @@ export default function UserProfilePage() {
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center p-12 min-h-[400px]">
-        <div className="w-8 h-8 border-4 border-violet-600 border-t-transparent rounded-full animate-spin mb-4" />
+        <div className="w-8 h-8 border-4 border-emerald-600 border-t-transparent rounded-full animate-spin mb-4" />
         <span className="text-sm font-semibold text-slate-500">Retrieving profile context...</span>
       </div>
     );
@@ -290,7 +318,8 @@ export default function UserProfilePage() {
     "-";
 
   // Address split helpers to ensure no truncation
-  const address = profileData?.aadhaarAddress || '';
+  const address = cleanDisplayValue(profileData?.aadhaarAddress);
+  const bestVillage = getBestLocation(profileData || {});
 
   return (
     <div className="flex flex-col gap-8 w-full max-w-5xl mx-auto pb-16 animate-fade-in font-sans">
@@ -317,7 +346,17 @@ export default function UserProfilePage() {
             placeholder="name@example.com"
             required
           />
-          <p className="text-xs text-slate-500 px-2">Aadhaar, KYC, phone, and wallet details are not changed here.</p>
+          <ClayInput
+            label="Phone Number"
+            type="tel"
+            inputMode="numeric"
+            value={editForm.phone}
+            onChange={(e) => setEditForm({ ...editForm, phone: e.target.value.replace(/\D/g, '').slice(0, 10) })}
+            placeholder="10-digit Indian mobile number"
+            maxLength={10}
+            required
+          />
+          <p className="text-xs text-slate-500 px-2">Aadhaar, KYC, and wallet details are not changed here.</p>
           <div className="flex justify-end gap-3 mt-2">
             <ClayButton variant="secondary" onClick={() => setShowEditModal(false)}>Cancel</ClayButton>
             <ClayButton type="submit" variant="primary" disabled={savingProfile}>
@@ -328,8 +367,8 @@ export default function UserProfilePage() {
       </ClayModal>
       
       {/* 1. HERO SECTION CARD */}
-      <ClayCard className="overflow-hidden border border-slate-200 shadow-sm relative rounded-[24px] bg-white p-0">
-        <div className="h-32 w-full bg-gradient-to-r from-violet-600 via-indigo-600 to-blue-600 relative opacity-90" />
+      <ClayCard className="overflow-hidden border border-emerald-100 shadow-[0_24px_70px_rgba(15,23,42,0.10)] relative rounded-[28px] bg-white p-0">
+        <div className="h-40 w-full bg-[linear-gradient(135deg,#0F172A_0%,#115E59_52%,#16A34A_100%)] relative" />
         <div className="px-6 pb-6 pt-0 flex flex-col md:flex-row gap-6 items-end -mt-12 relative z-10">
           
           <div className="w-28 h-32 rounded-2xl border-4 border-white shadow-md overflow-hidden bg-slate-100 flex items-center justify-center shrink-0">
@@ -342,9 +381,9 @@ export default function UserProfilePage() {
           </div>
 
           {/* User Brief */}
-          <div className="flex-1 text-left">
+          <div className="flex-1 text-left min-w-0">
             <div className="flex flex-wrap items-center gap-3">
-              <h1 className="text-xl font-bold text-slate-900 tracking-tight">{displayName}</h1>
+              <h1 className="text-2xl font-black text-slate-950 tracking-tight break-words">{displayName}</h1>
               <ClayBadge status={isApproved ? 'ACTIVE' : 'PENDING'}>
                 {isApproved ? 'KYC Approved' : kycStatus.replace(/_/g, ' ')}
               </ClayBadge>
@@ -352,7 +391,7 @@ export default function UserProfilePage() {
             <p className="text-xs text-slate-500 font-medium mt-1 flex items-center gap-1.5">
               <Mail className="w-3.5 h-3.5" /> {user?.email}
               <span className="text-slate-300">|</span>
-              <Shield className="w-3.5 h-3.5 text-violet-600" /> {user?.role}
+              <Shield className="w-3.5 h-3.5 text-emerald-600" /> {user?.role}
             </p>
             <p className="text-[10px] text-slate-400 font-mono mt-1">
               Member Since: {user?.createdAt ? new Date(user.createdAt).toLocaleDateString() : '—'}
@@ -369,15 +408,15 @@ export default function UserProfilePage() {
             </ClayButton>
             <ClayButton 
               onClick={() => handleDownloadPDF('profile')}
-              className="relative z-20 min-w-[168px] justify-center border border-blue-300 !text-white !bg-blue-600 hover:!bg-blue-700 shadow-sm text-xs font-bold px-4 py-2 flex items-center gap-1.5 h-[38px] opacity-100 whitespace-nowrap"
+              className="relative z-20 min-w-[168px] justify-center border border-emerald-300 !text-white !bg-emerald-600 hover:!bg-emerald-700 shadow-sm text-xs font-bold px-4 py-2 flex items-center gap-1.5 h-[38px] opacity-100 whitespace-nowrap"
             >
               <Download className="w-3.5 h-3.5 text-white" /> Download Profile
             </ClayButton>
             <ClayButton 
               onClick={() => handleDownloadPDF('kyc')}
-              className="relative z-20 min-w-[156px] justify-center border border-violet-300 !text-violet-900 !bg-violet-100 hover:!bg-violet-200 shadow-sm text-xs font-bold px-4 py-2 flex items-center gap-1.5 h-[38px] opacity-100 whitespace-nowrap"
+              className="relative z-20 min-w-[156px] justify-center border border-emerald-300 !text-emerald-900 !bg-emerald-100 hover:!bg-emerald-200 shadow-sm text-xs font-bold px-4 py-2 flex items-center gap-1.5 h-[38px] opacity-100 whitespace-nowrap"
             >
-              <FileText className="w-3.5 h-3.5 text-violet-800" /> KYC Certificate
+              <FileText className="w-3.5 h-3.5 text-emerald-800" /> KYC Certificate
             </ClayButton>
           </div>
         </div>
@@ -391,36 +430,21 @@ export default function UserProfilePage() {
           {/* 2. PERSONAL INFORMATION */}
           <div className="bg-white border border-slate-200 rounded-[20px] p-6 shadow-sm flex flex-col gap-4">
             <h2 className="text-sm font-bold text-slate-800 border-b border-slate-100 pb-3 flex items-center gap-2">
-              <User className="w-4.5 h-4.5 text-violet-600" /> Personal Identity Details
+              <User className="w-4.5 h-4.5 text-emerald-600" /> Personal Identity Details
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
-              <div>
-                <span className="text-slate-500 font-semibold block">Full Name</span>
-                <strong className="text-slate-800 text-sm">{displayName}</strong>
-              </div>
-              <div>
-                <span className="text-slate-500 font-semibold block">Date of Birth</span>
-                <strong className="text-slate-800 text-sm font-mono">{profileData?.aadhaarDob || '—'}</strong>
-              </div>
-              <div>
-                <span className="text-slate-500 font-semibold block">Gender</span>
-                <strong className="text-slate-800 text-sm">{profileData?.aadhaarGender || '—'}</strong>
-              </div>
-              <div>
-                <span className="text-slate-500 font-semibold block">Email Address</span>
-                <strong className="text-slate-800 text-sm">{user?.email || '—'}</strong>
-              </div>
-              <div>
-                <span className="text-slate-500 font-semibold block">Mobile Contact</span>
-                <strong className="text-slate-800 text-sm font-mono">{user?.phone || '—'}</strong>
-              </div>
+              <FieldItem label="Full Name" value={displayName} />
+              <FieldItem label="Date of Birth" value={profileData?.aadhaarDob} mono />
+              <FieldItem label="Gender" value={profileData?.aadhaarGender} />
+              <FieldItem label="Email Address" value={profileData?.user?.email || user?.email} />
+              <FieldItem label="Mobile Contact" value={profileData?.user?.phone || user?.phone} mono />
             </div>
           </div>
 
           {/* VERIFIED AADHAAR PHOTO SECTION */}
           <div className="bg-white border border-slate-200 rounded-[20px] p-6 shadow-sm flex flex-col gap-4">
             <h2 className="text-sm font-bold text-slate-800 border-b border-slate-100 pb-3 flex items-center gap-2">
-              <Shield className="w-4.5 h-4.5 text-violet-600" /> Verified Aadhaar Photo
+              <Shield className="w-4.5 h-4.5 text-emerald-600" /> Verified Aadhaar Photo
             </h2>
             <div className="flex flex-col sm:flex-row gap-5 items-center">
               <div className="w-24 h-28 bg-slate-50 rounded-xl border border-slate-200 p-1.5 shadow-sm relative overflow-hidden flex items-center justify-center shrink-0">
@@ -450,49 +474,22 @@ export default function UserProfilePage() {
           {/* 3. AADHAAR INFORMATION */}
           <div className="bg-white border border-slate-200 rounded-[20px] p-6 shadow-sm flex flex-col gap-4">
             <h2 className="text-sm font-bold text-slate-800 border-b border-slate-100 pb-3 flex items-center gap-2">
-              <Shield className="w-4.5 h-4.5 text-indigo-600" /> Aadhaar Verification Data
+              <Shield className="w-4.5 h-4.5 text-teal-700" /> Aadhaar Verification Data
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
-              <div>
-                <span className="text-slate-500 font-semibold block">Aadhaar Registered Name</span>
-                <strong className="text-slate-800 text-sm">{profileData?.aadhaarName || '—'}</strong>
-              </div>
-              <div>
-                <span className="text-slate-500 font-semibold block">Aadhaar Number (Masked)</span>
-                <strong className="text-slate-800 text-sm font-mono">{profileData?.aadhaarNumberMasked || '—'}</strong>
-              </div>
-              <div>
-                <span className="text-slate-500 font-semibold block">Aadhaar Verification Status</span>
+              <FieldItem label="Aadhaar Registered Name" value={profileData?.aadhaarName} />
+              <FieldItem label="Aadhaar Number (Masked)" value={profileData?.aadhaarNumberMasked} mono />
+              <FieldItem label="Aadhaar Verification Status">
                 <ClayBadge status={profileData?.aadhaarVerified ? 'ACTIVE' : 'PENDING'}>
                   {profileData?.aadhaarVerified ? 'VERIFIED' : 'PENDING'}
                 </ClayBadge>
-              </div>
-              <div>
-                <span className="text-slate-500 font-semibold block">Verification Timestamp</span>
-                <strong className="text-slate-800 text-sm font-mono">
-                  {profileData?.aadhaarVerifiedAt ? new Date(profileData.aadhaarVerifiedAt).toLocaleString() : '—'}
-                </strong>
-              </div>
-              <div>
-                <span className="text-slate-500 font-semibold block">Village / Town</span>
-                <strong className="text-slate-800 text-sm">{profileData?.aadhaarVillage || '—'}</strong>
-              </div>
-              <div>
-                <span className="text-slate-500 font-semibold block">District</span>
-                <strong className="text-slate-800 text-sm">{profileData?.aadhaarDistrict || '—'}</strong>
-              </div>
-              <div>
-                <span className="text-slate-500 font-semibold block">State</span>
-                <strong className="text-slate-800 text-sm">{profileData?.aadhaarState || '—'}</strong>
-              </div>
-              <div>
-                <span className="text-slate-500 font-semibold block">Pincode</span>
-                <strong className="text-slate-800 text-sm font-mono">{profileData?.aadhaarPincode || '—'}</strong>
-              </div>
-              <div>
-                <span className="text-slate-500 font-semibold block">Country</span>
-                <strong className="text-slate-800 text-sm">{profileData?.aadhaarCountry || '—'}</strong>
-              </div>
+              </FieldItem>
+              <FieldItem label="Verification Timestamp" value={profileData?.aadhaarVerifiedAt ? new Date(profileData.aadhaarVerifiedAt).toLocaleString() : ''} mono />
+              <FieldItem label="Village / Town" value={bestVillage} />
+              <FieldItem label="District" value={profileData?.aadhaarDistrict} />
+              <FieldItem label="State" value={profileData?.aadhaarState} />
+              <FieldItem label="Pincode" value={profileData?.aadhaarPincode} mono />
+              <FieldItem label="Country" value={profileData?.aadhaarCountry} />
             </div>
           </div>
 

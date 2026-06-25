@@ -1,3 +1,4 @@
+import toast from '../../lib/toast.jsx';
 import React, { useState } from 'react';
 import { Wallet as WalletIcon, Terminal, CheckCircle2, Key, AlertTriangle, Play, RefreshCw, Eye } from 'lucide-react';
 import { ClayWidget, ClayBadge, ClayTable, ClayCard, ClayButton } from '../Claymorphic';
@@ -40,7 +41,7 @@ export default function DashboardHome({ balance, stats, apiKeys, transactions, u
     if (isApproved) return 'bg-emerald-500';
     if (currentKycStatus === 'KYC_REJECTED' || currentKycStatus === 'REJECTED') return 'bg-rose-500';
     if (currentKycStatus === 'AADHAAR_OTP_SENT') return 'bg-amber-500';
-    return 'bg-violet-500';
+    return 'bg-emerald-500';
   };
 
   const handleRetryKyc = async () => {
@@ -63,7 +64,7 @@ export default function DashboardHome({ balance, stats, apiKeys, transactions, u
       }
     } catch (err) {
       console.error('Failed to retry KYC:', err);
-      alert(err.response?.data?.error || 'Failed to restart KYC.');
+      toast.info(err.response?.data?.error || 'Failed to restart KYC.');
     } finally {
       setRetryLoading(false);
     }
@@ -125,7 +126,7 @@ export default function DashboardHome({ balance, stats, apiKeys, transactions, u
                 <ClayButton 
                   variant="primary" 
                   onClick={() => navigate('/kyc')}
-                  className="py-2.5 px-6 font-bold text-xs bg-violet-600 text-white hover:bg-violet-700 flex items-center gap-1.5 shadow-md shadow-violet-500/15 rounded-full"
+                  className="py-2.5 px-6 font-bold text-xs bg-emerald-600 text-white hover:bg-emerald-700 flex items-center gap-1.5 shadow-md shadow-emerald-500/15 rounded-full"
                 >
                   <Play className="w-3.5 h-3.5" /> Complete KYC
                 </ClayButton>
@@ -226,11 +227,11 @@ export default function DashboardHome({ balance, stats, apiKeys, transactions, u
             <div className="flex justify-between items-center">
               <span className="text-xs text-slate-500 font-semibold">Role Permissions</span>
               {user?.role === 'Client User' ? (
-                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-blue-50 border border-blue-200 text-blue-700">
+                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 border border-emerald-200 text-emerald-700">
                   Client User
                 </span>
               ) : (
-                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-violet-50 border border-violet-200 text-violet-700">
+                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 border border-emerald-200 text-emerald-700">
                   {user?.role}
                 </span>
               )}

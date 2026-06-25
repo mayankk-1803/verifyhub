@@ -1,3 +1,4 @@
+import toast from '../../lib/toast.jsx';
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../../lib/api';
@@ -346,7 +347,7 @@ export default function SuperAdminPanel() {
             document.body.removeChild(link);
         } catch (err) {
             console.error('Failed to export CSV:', err);
-            alert('Failed to export CSV: ' + (err.response?.data?.error || err.message));
+            toast.info('Failed to export CSV: ' + (err.response?.data?.error || err.message));
         }
     };
 
@@ -360,7 +361,7 @@ export default function SuperAdminPanel() {
                 setIsDrawerOpen(true);
             }
         } catch (err) {
-            alert(getSafeActionMessage(err, 'Unable to load user details.'));
+            toast.info(getSafeActionMessage(err, 'Unable to load user details.'));
         } finally {
             endAction(key);
         }
@@ -371,13 +372,13 @@ export default function SuperAdminPanel() {
         try {
             const res = await api.post('/api/v1/admin/users', createUserForm);
             if (res.data.success) {
-                alert('User created successfully.');
+                toast.info('User created successfully.');
                 setShowCreateModal(false);
                 setCreateUserForm({ name: '', email: '', phone: '', password: '', role: 'Client User' });
                 fetchUsers();
             }
         } catch (err) {
-            alert(err.response?.data?.error || 'Failed to create user.');
+            toast.info(err.response?.data?.error || 'Failed to create user.');
         }
     };
 
@@ -399,7 +400,7 @@ export default function SuperAdminPanel() {
 
     const handleDeleteUserSubmit = async () => {
         if (deleteConfirmText !== 'DELETE USER') {
-            alert('Please type "DELETE USER" exactly to confirm deletion.');
+            toast.info('Please type "DELETE USER" exactly to confirm deletion.');
             return;
         }
         if (!userToDelete || !beginAction('delete-user')) return;
@@ -408,7 +409,7 @@ export default function SuperAdminPanel() {
                 data: { confirmation: deleteConfirmText }
             });
             if (res.data.success) {
-                alert('User deleted successfully.');
+                toast.info('User deleted successfully.');
                 setShowDeleteModal(false);
                 setUserToDelete(null);
                 setDeleteConfirmText('');
@@ -419,7 +420,7 @@ export default function SuperAdminPanel() {
                 fetchUsers();
             }
         } catch (err) {
-            alert(getSafeActionMessage(err, 'Unable to delete user because related records exist.'));
+            toast.info(getSafeActionMessage(err, 'Unable to delete user because related records exist.'));
         } finally {
             endAction('delete-user');
         }
@@ -431,14 +432,14 @@ export default function SuperAdminPanel() {
         try {
             const res = await api.put(`/api/v1/admin/users/${userId}/status`, { status: newStatus });
             if (res.data.success) {
-                alert('User status updated successfully.');
+                toast.info('User status updated successfully.');
                 if (selectedUser && selectedUser.id === userId) {
                     setSelectedUser({ ...selectedUser, status: newStatus });
                 }
                 refreshCurrentTab();
             }
         } catch (err) {
-            alert(getSafeActionMessage(err, 'Unable to update user status.'));
+            toast.info(getSafeActionMessage(err, 'Unable to update user status.'));
         } finally {
             endAction(key);
         }
@@ -450,11 +451,11 @@ export default function SuperAdminPanel() {
         try {
             const res = await api.post(`/api/v1/admin/users/${selectedUser.id}/reset-password`, { password: newPassword });
             if (res.data.success) {
-                alert('Password updated successfully.');
+                toast.info('Password updated successfully.');
                 setNewPassword('');
             }
         } catch (err) {
-            alert(err.response?.data?.error || 'Failed to update password.');
+            toast.info(err.response?.data?.error || 'Failed to update password.');
         }
     };
 
@@ -462,14 +463,14 @@ export default function SuperAdminPanel() {
         e.preventDefault();
         const cleanPhone = String(phoneForm.phone || '').replace(/\D/g, '');
         if (!/^\d{10}$/.test(cleanPhone)) {
-            alert('Invalid phone number');
+            toast.info('Invalid phone number');
             return;
         }
         if (!beginAction('update-phone')) return;
         try {
             const res = await api.patch(`/api/v1/admin/users/${phoneForm.userId}/phone`, { phone: cleanPhone });
             if (res.data.success) {
-                alert(res.data.message || 'Phone number updated successfully');
+                toast.info(res.data.message || 'Phone number updated successfully');
                 setShowPhoneModal(false);
                 setPhoneForm({ userId: '', userName: '', currentPhone: '', phone: '' });
                 if (selectedUser && selectedUser.id === phoneForm.userId) {
@@ -478,7 +479,7 @@ export default function SuperAdminPanel() {
                 fetchUsers();
             }
         } catch (err) {
-            alert(getSafeActionMessage(err, 'Unable to update phone number.'));
+            toast.info(getSafeActionMessage(err, 'Unable to update phone number.'));
         } finally {
             endAction('update-phone');
         }
@@ -490,11 +491,11 @@ export default function SuperAdminPanel() {
         try {
             const res = await api.post(`/api/v1/admin/users/${userId}/reset-otp`);
             if (res.data.success) {
-                alert('User OTP lockouts and limits cleared.');
+                toast.info('User OTP lockouts and limits cleared.');
                 refreshCurrentTab();
             }
         } catch (err) {
-            alert(getSafeActionMessage(err, 'Unable to reset user OTP.'));
+            toast.info(getSafeActionMessage(err, 'Unable to reset user OTP.'));
         } finally {
             endAction(key);
         }
@@ -508,7 +509,7 @@ export default function SuperAdminPanel() {
 
             const res = await api.post(endpoint);
             if (res.data.success) {
-                alert(isCurrentlyActive ? 'Service deactivated.' : 'Service activated.');
+                toast.info(isCurrentlyActive ? 'Service deactivated.' : 'Service activated.');
                 refreshCurrentTab();
                 if (selectedUser && selectedUser.id === userId) {
                     const updatedSubs = isCurrentlyActive
@@ -518,7 +519,7 @@ export default function SuperAdminPanel() {
                 }
             }
         } catch (err) {
-            alert(err.response?.data?.error || 'Failed to update service subscription.');
+            toast.info(err.response?.data?.error || 'Failed to update service subscription.');
         }
     };
 
@@ -526,7 +527,7 @@ export default function SuperAdminPanel() {
         try {
             const res = await api.post(`/api/v1/admin/users/${userId}/services/${serviceId}/extend`, { days: daysVal });
             if (res.data.success) {
-                alert(`Subscription extended by ${daysVal} days.`);
+                toast.info(`Subscription extended by ${daysVal} days.`);
                 refreshCurrentTab();
                 if (selectedUser && selectedUser.id === userId) {
                     const updatedSubs = selectedUser.subscriptions.map(sub =>
@@ -536,7 +537,7 @@ export default function SuperAdminPanel() {
                 }
             }
         } catch (err) {
-            alert(err.response?.data?.error || 'Failed to extend subscription.');
+            toast.info(err.response?.data?.error || 'Failed to extend subscription.');
         }
     };
 
@@ -544,11 +545,11 @@ export default function SuperAdminPanel() {
         try {
             const res = await api.put(`/api/v1/admin/routing/${routeId}`, fields);
             if (res.data.success) {
-                alert('Provider routing updated!');
+                toast.info('Provider routing updated!');
                 fetchRoutingAndPricing();
             }
         } catch (err) {
-            alert('Failed to edit provider route.');
+            toast.info('Failed to edit provider route.');
         }
     };
 
@@ -556,11 +557,11 @@ export default function SuperAdminPanel() {
         try {
             const res = await api.put(`/api/v1/admin/pricing/${ruleId}`, fields);
             if (res.data.success) {
-                alert('Pricing margin adjusted!');
+                toast.info('Pricing margin adjusted!');
                 fetchRoutingAndPricing();
             }
         } catch (err) {
-            alert('Failed to edit pricing rule.');
+            toast.info('Failed to edit pricing rule.');
         }
     };
 
@@ -574,14 +575,14 @@ export default function SuperAdminPanel() {
                 description: adminAdjustDesc
             });
             if (res.data.success) {
-                alert(`Wallet successfully adjusted! New balance: ₹${parseFloat(res.data.balance).toFixed(2)}`);
+                toast.info(`Wallet successfully adjusted! New balance: ₹${parseFloat(res.data.balance).toFixed(2)}`);
                 setAdminAdjustUserId('');
                 setAdminAdjustAmount('');
                 setAdminAdjustDesc('');
                 refreshCurrentTab();
             }
         } catch (err) {
-            alert(err.response?.data?.error || 'Adjustment failed.');
+            toast.info(err.response?.data?.error || 'Adjustment failed.');
         }
     };
 
@@ -596,13 +597,13 @@ export default function SuperAdminPanel() {
                 description: creditForm.reason || 'Manual admin credit adjustment'
             });
             if (res.data.success) {
-                alert(`Wallet successfully credited! New balance: ₹${parseFloat(res.data.balance).toFixed(2)}`);
+                toast.info(`Wallet successfully credited! New balance: ₹${parseFloat(res.data.balance).toFixed(2)}`);
                 setShowCreditModal(false);
                 setCreditForm({ userId: '', userName: '', amount: '', reason: '' });
                 refreshCurrentTab();
             }
         } catch (err) {
-            alert(getSafeActionMessage(err, 'Unable to credit wallet.'));
+            toast.info(getSafeActionMessage(err, 'Unable to credit wallet.'));
         } finally {
             endAction('credit-wallet');
         }
@@ -619,13 +620,13 @@ export default function SuperAdminPanel() {
                 description: debitForm.reason || 'Manual admin debit adjustment'
             });
             if (res.data.success) {
-                alert(`Wallet successfully debited! New balance: ₹${parseFloat(res.data.balance).toFixed(2)}`);
+                toast.info(`Wallet successfully debited! New balance: ₹${parseFloat(res.data.balance).toFixed(2)}`);
                 setShowDebitModal(false);
                 setDebitForm({ userId: '', userName: '', amount: '', reason: '' });
                 refreshCurrentTab();
             }
         } catch (err) {
-            alert(getSafeActionMessage(err, 'Unable to debit wallet.'));
+            toast.info(getSafeActionMessage(err, 'Unable to debit wallet.'));
         } finally {
             endAction('debit-wallet');
         }
@@ -639,12 +640,12 @@ export default function SuperAdminPanel() {
                 password: resetPassForm.password
             });
             if (res.data.success) {
-                alert('Password reset successfully.');
+                toast.info('Password reset successfully.');
                 setShowResetPasswordModal(false);
                 setResetPassForm({ userId: '', userName: '', password: '' });
             }
         } catch (err) {
-            alert(getSafeActionMessage(err, 'Unable to reset password.'));
+            toast.info(getSafeActionMessage(err, 'Unable to reset password.'));
         } finally {
             endAction('reset-password');
         }
@@ -654,11 +655,11 @@ export default function SuperAdminPanel() {
         try {
             const res = await api.put(`/api/v1/admin/tickets/${ticketId}/status`, { status: newStatus });
             if (res.data.success) {
-                alert('Ticket status changed: ' + newStatus);
+                toast.info('Ticket status changed: ' + newStatus);
                 fetchWalletAndTickets();
             }
         } catch (err) {
-            alert('Failed to update ticket status.');
+            toast.info('Failed to update ticket status.');
         }
     };
 
@@ -670,12 +671,12 @@ export default function SuperAdminPanel() {
                 description: settingDesc
             });
             if (res.data.success) {
-                alert('Setting updated successfully.');
+                toast.info('Setting updated successfully.');
                 setEditingSetting(null);
                 fetchSettings();
             }
         } catch (err) {
-            alert('Failed to update setting.');
+            toast.info('Failed to update setting.');
         }
     };
 
@@ -716,7 +717,7 @@ export default function SuperAdminPanel() {
                                 setSubPage(1);
                             }}
                             className={`px-4 py-2 rounded-full text-xs font-bold font-display whitespace-nowrap transition-all duration-300 ${activeSubTab === tab.id
-                                    ? 'bg-violet-600 text-white shadow-md'
+                                    ? 'bg-emerald-600 text-white shadow-md'
                                     : 'bg-slate-50 border border-slate-200 text-slate-600 hover:bg-slate-100 hover:text-slate-800'
                                 }`}
                         >
@@ -725,7 +726,7 @@ export default function SuperAdminPanel() {
                     ))}
                 </div>
                 <div className="text-xs font-bold text-slate-500 font-display flex items-center gap-1.5 whitespace-nowrap">
-                    <Shield className="w-4 h-4 text-violet-600 animate-pulse" />
+                    <Shield className="w-4 h-4 text-emerald-600 animate-pulse" />
                     Dizipay User Management Control Center
                 </div>
             </div>
@@ -763,7 +764,7 @@ export default function SuperAdminPanel() {
                                                 setCurrentPage(1);
                                             }}
                                             placeholder="Search name, email, phone..."
-                                            className="w-full pl-10 pr-4 py-2 border border-slate-200 rounded-full text-xs focus:border-violet-500 outline-none"
+                                            className="w-full pl-10 pr-4 py-2 border border-slate-200 rounded-full text-xs focus:border-emerald-500 outline-none"
                                         />
                                     </div>
                                     <div className="relative">
@@ -773,7 +774,7 @@ export default function SuperAdminPanel() {
                                                 setSortBy(e.target.value);
                                                 setCurrentPage(1);
                                             }}
-                                            className="bg-white border border-slate-200 rounded-full px-4 py-2 text-xs focus:border-violet-500 outline-none font-semibold text-slate-700 h-[38px]"
+                                            className="bg-white border border-slate-200 rounded-full px-4 py-2 text-xs focus:border-emerald-500 outline-none font-semibold text-slate-700 h-[38px]"
                                         >
                                             <option value="newest">Sort: Newest</option>
                                             <option value="oldest">Sort: Oldest</option>
@@ -819,7 +820,7 @@ export default function SuperAdminPanel() {
                                             <tr key={u.id} className="hover:bg-slate-50/50 transition-colors">
                                                 <td className="px-6 py-4 font-mono font-semibold text-slate-500">{u.id}</td>
                                                 <td 
-                                                    className="px-6 py-4 font-semibold text-slate-800 hover:text-violet-650 hover:underline cursor-pointer text-left"
+                                                    className="px-6 py-4 font-semibold text-slate-800 hover:text-emerald-600 hover:underline cursor-pointer text-left"
                                                     onClick={() => navigate(`/admin/users/${u.id}`)}
                                                 >
                                                     {u.name || '—'}
@@ -834,7 +835,7 @@ export default function SuperAdminPanel() {
                                                 <td className="px-6 py-4">
                                                     <ClayBadge status={u.status}>{u.status}</ClayBadge>
                                                 </td>
-                                                <td className="px-6 py-4 font-mono font-bold text-violet-750">
+                                                <td className="px-6 py-4 font-mono font-bold text-emerald-700">
                                                     ₹{u.Wallet ? parseFloat(u.Wallet.balance).toFixed(2) : '0.00'}
                                                 </td>
                                                 <td className="px-6 py-4 text-slate-500">
@@ -847,7 +848,7 @@ export default function SuperAdminPanel() {
                                                     <div className="flex justify-end gap-1.5">
                                                     <button
                                                         onClick={() => openUserDrawer(u)}
-                                                        className="p-1.5 text-violet-600 hover:bg-violet-50 rounded-lg transition-colors border border-violet-100"
+                                                        className="p-1.5 text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors border border-emerald-100"
                                                         title="View User Details"
                                                     >
                                                         <Eye className="w-4 h-4" />
@@ -874,7 +875,7 @@ export default function SuperAdminPanel() {
                                                     </button>
                                                     <button
                                                         onClick={() => openPhoneModal(u)}
-                                                        className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors border border-blue-100"
+                                                        className="p-1.5 text-teal-600 hover:bg-teal-50 rounded-lg transition-colors border border-teal-100"
                                                         title="Manage Phone"
                                                     >
                                                         <Phone className="w-4 h-4" />
@@ -952,7 +953,7 @@ export default function SuperAdminPanel() {
                                             </div>
                                             <div>
                                                 <span className="text-slate-500 block">Wallet</span>
-                                                <span className="font-bold text-violet-700">₹{u.Wallet ? parseFloat(u.Wallet.balance).toFixed(2) : '0.00'}</span>
+                                                <span className="font-bold text-emerald-700">₹{u.Wallet ? parseFloat(u.Wallet.balance).toFixed(2) : '0.00'}</span>
                                             </div>
                                             <div>
                                                 <span className="text-slate-500 block">Created At</span>
@@ -962,7 +963,7 @@ export default function SuperAdminPanel() {
                                         <div className="flex flex-wrap gap-2 pt-2 border-t border-slate-100 justify-start">
                                             <button
                                                 onClick={() => openUserDrawer(u)}
-                                                className="p-2 text-violet-600 hover:bg-violet-50 rounded-lg border border-violet-100"
+                                                className="p-2 text-emerald-600 hover:bg-emerald-50 rounded-lg border border-emerald-100"
                                                 title="View User Details"
                                             >
                                                 <Eye className="w-4 h-4" />
@@ -989,7 +990,7 @@ export default function SuperAdminPanel() {
                                             </button>
                                             <button
                                                 onClick={() => openPhoneModal(u)}
-                                                className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg border border-blue-100"
+                                                className="p-2 text-teal-600 hover:bg-teal-50 rounded-lg border border-teal-100"
                                                 title="Manage Phone"
                                             >
                                                 <Phone className="w-4 h-4" />
@@ -1080,7 +1081,7 @@ export default function SuperAdminPanel() {
                                                     key={p}
                                                     onClick={() => setCurrentPage(p)}
                                                     className={`w-8 h-8 rounded-lg font-bold border transition-colors ${currentPage === p
-                                                            ? 'bg-violet-600 border-violet-600 text-white'
+                                                            ? 'bg-emerald-600 border-emerald-600 text-white'
                                                             : 'border-slate-250 hover:bg-slate-100 text-slate-700'
                                                         }`}
                                                 >
@@ -1109,7 +1110,7 @@ export default function SuperAdminPanel() {
                                 <ClayCard className="flex flex-col gap-6 bg-white border border-slate-200 rounded-[24px] shadow-sm">
                                     <div>
                                         <h4 className="text-sm font-bold font-display text-slate-900 mb-4 flex items-center gap-1.5">
-                                            <CreditCard className="w-4 h-4 text-violet-600" /> Admin Wallet Adjustment Manager
+                                            <CreditCard className="w-4 h-4 text-emerald-600" /> Admin Wallet Adjustment Manager
                                         </h4>
                                         <form onSubmit={handleAdminWalletAdjustSubmit} className="flex flex-col gap-4">
                                             <ClayDropdown
@@ -1156,7 +1157,7 @@ export default function SuperAdminPanel() {
                             {/* Wallet Balances list for user reference */}
                             <div className="lg:col-span-7 flex flex-col gap-4 text-left">
                                 <h4 className="text-sm font-bold font-display text-slate-900 flex items-center gap-1.5">
-                                    <Coins className="w-4 h-4 text-violet-600" /> Wallet Balance Ledger reference
+                                    <Coins className="w-4 h-4 text-emerald-600" /> Wallet Balance Ledger reference
                                 </h4>
                                 <div className="w-full border border-slate-200 bg-white rounded-2xl shadow-sm overflow-hidden">
                                     <table className="w-full border-collapse text-left text-xs">
@@ -1171,7 +1172,7 @@ export default function SuperAdminPanel() {
                                             {adminUsers.map((u) => (
                                                 <tr key={u.id} className="hover:bg-slate-50/50 transition-colors">
                                                     <td className="px-6 py-3 font-semibold text-slate-800">{getDisplayEmail(u) || u.phone}</td>
-                                                    <td className="px-6 py-3 font-mono font-bold text-violet-700">
+                                                    <td className="px-6 py-3 font-mono font-bold text-emerald-700">
                                                         ₹{u.Wallet ? parseFloat(u.Wallet.balance).toFixed(2) : '0.00'}
                                                     </td>
                                                     <td className="px-6 py-3 text-slate-400 font-mono">INR</td>
@@ -1231,7 +1232,7 @@ export default function SuperAdminPanel() {
                                                                 activationFee: parseFloat(svc.activationFee || 49.0).toString()
                                                             });
                                                         }}
-                                                        className="px-3 py-1.5 bg-violet-600 hover:bg-violet-750 text-white font-bold rounded-lg text-xs"
+                                                        className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-lg text-xs"
                                                     >
                                                         Edit Config
                                                     </button>
@@ -1262,7 +1263,7 @@ export default function SuperAdminPanel() {
                                             setSubPage(1);
                                         }}
                                         placeholder="Search user email, service name..."
-                                        className="w-full pl-10 pr-4 py-2 border border-slate-200 rounded-full text-xs focus:border-violet-500 outline-none"
+                                        className="w-full pl-10 pr-4 py-2 border border-slate-200 rounded-full text-xs focus:border-emerald-500 outline-none"
                                     />
                                 </div>
                             </div>
@@ -1310,7 +1311,7 @@ export default function SuperAdminPanel() {
                                                                 const days = document.getElementById(`days-ext-${sub.id}`)?.value || '30';
                                                                 handleExtendService(sub.userId, sub.serviceId, days);
                                                             }}
-                                                            className="px-2.5 py-1 rounded bg-violet-50 text-violet-700 font-bold border border-violet-100 hover:bg-violet-100 text-[10px]"
+                                                            className="px-2.5 py-1 rounded bg-emerald-50 text-emerald-700 font-bold border border-emerald-100 hover:bg-emerald-100 text-[10px]"
                                                         >
                                                             Extend
                                                         </button>
@@ -1355,7 +1356,7 @@ export default function SuperAdminPanel() {
                                                     const days = document.getElementById(`days-ext-mob-${sub.id}`)?.value || '30';
                                                     handleExtendService(sub.userId, sub.serviceId, days);
                                                 }}
-                                                className="px-2 py-1 bg-violet-50 text-violet-700 font-bold border border-violet-100 rounded text-[10px]"
+                                                className="px-2 py-1 bg-emerald-50 text-emerald-700 font-bold border border-emerald-100 rounded text-[10px]"
                                             >
                                                 Extend
                                             </button>
@@ -1438,7 +1439,7 @@ export default function SuperAdminPanel() {
                                                     <td className="px-6 py-4 font-mono font-bold text-slate-900">{rule.serviceType}</td>
                                                     <td className="px-6 py-4 font-mono">₹{parseFloat(rule.providerCost).toFixed(2)}</td>
                                                     <td className="px-6 py-4 font-mono font-bold text-slate-800">₹{parseFloat(rule.sellingPrice).toFixed(2)}</td>
-                                                    <td className="px-6 py-4 font-mono font-bold text-violet-600">₹{parseFloat(rule.margin).toFixed(2)}</td>
+                                                    <td className="px-6 py-4 font-mono font-bold text-emerald-600">₹{parseFloat(rule.margin).toFixed(2)}</td>
                                                     <td className="px-6 py-4 text-right flex justify-end gap-2">
                                                         <button
                                                             onClick={() => handleUpdatePricingRule(rule.id, {
@@ -1561,7 +1562,7 @@ export default function SuperAdminPanel() {
                                                 {ticket.status !== 'RESOLVED' && (
                                                     <button
                                                         onClick={() => handleTicketStatusChange(ticket.id, 'RESOLVED')}
-                                                        className="text-violet-600 hover:underline font-bold"
+                                                        className="text-emerald-600 hover:underline font-bold"
                                                     >
                                                         Resolve
                                                     </button>
@@ -1678,7 +1679,7 @@ export default function SuperAdminPanel() {
                         <select
                             value={createUserForm.role}
                             onChange={(e) => setCreateUserForm({ ...createUserForm, role: e.target.value })}
-                            className="w-full bg-white text-slate-900 rounded-full px-5 py-3.5 border border-slate-350 shadow-clay-input focus:border-violet-500 outline-none text-xs font-medium"
+                            className="w-full bg-white text-slate-900 rounded-full px-5 py-3.5 border border-slate-350 shadow-clay-input focus:border-emerald-500 outline-none text-xs font-medium"
                             required
                         >
                             <option value="Client User">Client User</option>
@@ -1930,7 +1931,7 @@ export default function SuperAdminPanel() {
                         <div className="p-6 border-b border-slate-150 flex justify-between items-center bg-slate-50/50">
                             <div className="flex flex-col">
                                 <h2 className="text-base font-bold font-display text-slate-900 flex items-center gap-2">
-                                    <Shield className="w-5 h-5 text-violet-600" /> Account Dashboard Overview
+                                    <Shield className="w-5 h-5 text-emerald-600" /> Account Dashboard Overview
                                 </h2>
                                 <p className="text-xs text-slate-500 font-mono mt-0.5">{getDisplayEmail(selectedUser) || selectedUser.phone}</p>
                             </div>
@@ -1957,7 +1958,7 @@ export default function SuperAdminPanel() {
                                             setSelectedUser(null);
                                             navigate(`/admin/users/${selectedUser.id}`);
                                         }}
-                                        className="text-violet-600 hover:text-violet-850 hover:underline font-bold text-xs flex items-center gap-1"
+                                        className="text-emerald-600 hover:text-emerald-800 hover:underline font-bold text-xs flex items-center gap-1"
                                     >
                                         <Eye className="w-3.5 h-3.5" /> Inspect Full Account
                                     </button>
@@ -2052,7 +2053,7 @@ export default function SuperAdminPanel() {
                                                 else if (evt.action === 'KYC_RETRY') displayAction = 'KYC Retry Request';
                                                 return (
                                                     <div key={idx} className="relative pl-6">
-                                                        <span className="absolute -left-1.5 top-1.5 w-3 h-3 rounded-full bg-violet-600 border border-white" />
+                                                        <span className="absolute -left-1.5 top-1.5 w-3 h-3 rounded-full bg-emerald-600 border border-white" />
                                                         <div className="flex flex-col text-left">
                                                             <span className="text-[10px] text-slate-400 font-mono">{evt.date.toLocaleString()}</span>
                                                             <span className="text-xs font-bold text-slate-800">{displayAction}</span>
@@ -2073,7 +2074,7 @@ export default function SuperAdminPanel() {
                                             type="text"
                                             placeholder="Remarks for approve/reject"
                                             id={`admin-kyc-remarks-${selectedUser.id}`}
-                                            className="flex-1 px-3 py-1.5 border border-slate-250 bg-white rounded-lg text-xs outline-none focus:border-violet-500"
+                                            className="flex-1 px-3 py-1.5 border border-slate-250 bg-white rounded-lg text-xs outline-none focus:border-emerald-500"
                                         />
                                         <button
                                             onClick={async () => {
@@ -2081,12 +2082,12 @@ export default function SuperAdminPanel() {
                                                 try {
                                                     const res = await api.post(`/api/v1/admin/kyc/${selectedUser.id}/approve`, { remarks });
                                                     if (res.data.success) {
-                                                        alert('KYC manually approved.');
+                                                        toast.info('KYC manually approved.');
                                                         setSelectedUser({ ...selectedUser, kycStatus: 'KYC_APPROVED', kycRemarks: remarks || 'Manually approved by Administrator' });
                                                         refreshCurrentTab();
                                                     }
                                                 } catch (err) {
-                                                    alert(err.response?.data?.error || 'Failed to approve KYC');
+                                                    toast.info(err.response?.data?.error || 'Failed to approve KYC');
                                                 }
                                             }}
                                             className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-lg text-xs"
@@ -2099,12 +2100,12 @@ export default function SuperAdminPanel() {
                                                 try {
                                                     const res = await api.post(`/api/v1/admin/kyc/${selectedUser.id}/reject`, { remarks });
                                                     if (res.data.success) {
-                                                        alert('KYC manually rejected.');
+                                                        toast.info('KYC manually rejected.');
                                                         setSelectedUser({ ...selectedUser, kycStatus: 'KYC_REJECTED', kycRemarks: remarks || 'Manually rejected by Administrator' });
                                                         refreshCurrentTab();
                                                     }
                                                 } catch (err) {
-                                                    alert(err.response?.data?.error || 'Failed to reject KYC');
+                                                    toast.info(err.response?.data?.error || 'Failed to reject KYC');
                                                 }
                                             }}
                                             className="px-3 py-1.5 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-lg text-xs"
@@ -2206,7 +2207,7 @@ export default function SuperAdminPanel() {
                                                                 const d = document.getElementById(`drawer-ext-days-${svc.id}`)?.value || '30';
                                                                 handleExtendService(selectedUser.id, svc.id, d);
                                                             }}
-                                                            className="text-violet-600 hover:underline font-bold text-[10px]"
+                                                            className="text-emerald-600 hover:underline font-bold text-[10px]"
                                                         >
                                                             Extend Days
                                                         </button>
@@ -2339,12 +2340,12 @@ export default function SuperAdminPanel() {
                         try {
                             const res = await api.put(`/api/v1/admin/services/${editingAdminService.id}`, serviceForm);
                             if (res.data.success) {
-                                alert('Service updated successfully.');
+                                toast.info('Service updated successfully.');
                                 setEditingAdminService(null);
                                 fetchAdminServices();
                             }
                         } catch (err) {
-                            alert(err.response?.data?.error || 'Failed to update service.');
+                            toast.info(err.response?.data?.error || 'Failed to update service.');
                         }
                     }} 
                     className="flex flex-col gap-4 text-left font-sans"
@@ -2359,7 +2360,7 @@ export default function SuperAdminPanel() {
                     <div className="w-full">
                         <label className="block text-xs font-semibold text-slate-700 mb-2 font-display ml-1">Service Description</label>
                         <textarea
-                            className="w-full bg-white text-slate-900 rounded-[16px] p-4 border border-slate-350 shadow-sm outline-none text-xs focus:border-violet-500 focus:ring-2 focus:ring-violet-500/20 transition-all duration-300"
+                            className="w-full bg-white text-slate-900 rounded-[16px] p-4 border border-slate-350 shadow-sm outline-none text-xs focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all duration-300"
                             rows="3"
                             value={serviceForm.description}
                             onChange={(e) => setServiceForm({ ...serviceForm, description: e.target.value })}

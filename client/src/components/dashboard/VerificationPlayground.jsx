@@ -1,6 +1,38 @@
 import React, { useState } from 'react';
 import { ClayCard, ClayButton, ClayInput, ClayBadge, ClayTable, ClayTabs } from '../Claymorphic';
-import { ShieldAlert, Search, Layers, Play, CheckCircle2, Lock } from 'lucide-react';
+import { Search, Play, CheckCircle2, Lock, Copy, ChevronDown } from 'lucide-react';
+import toast from '../../lib/toast.jsx';
+
+const AUDIT_KEYS = ['AADHAAR_OTP', 'AADHAAR_DATA', 'AADHAAR_PAN', 'PAN_CARD', 'PAN_BASIC', 'PAN_VERIFICATION', 'PAN_DECODE', 'PAN_TRACK', 'GST_VERIFY', 'GST_RETURN', 'RATION', 'VOTER_VERIFY'];
+
+const isObjectLike = (value) => value && typeof value === 'object';
+
+const JsonValue = ({ name, value, depth = 0 }) => {
+  if (!isObjectLike(value)) {
+    return (
+      <div className="py-0.5">
+        {name && <span className="text-sky-300">"{name}": </span>}
+        <span className={typeof value === 'string' ? 'text-emerald-300' : typeof value === 'boolean' ? 'text-amber-300' : 'text-purple-300'}>
+          {JSON.stringify(value)}
+        </span>
+      </div>
+    );
+  }
+
+  const entries = Array.isArray(value) ? value.map((item, i) => [String(i), item]) : Object.entries(value);
+  return (
+    <details open={depth < 1} className="group py-1">
+      <summary className="flex cursor-pointer select-none items-center gap-2 text-slate-300 hover:text-white">
+        <ChevronDown className="h-3 w-3 transition group-open:rotate-180" />
+        {name && <span className="text-sky-300">"{name}"</span>}
+        <span className="text-slate-500">{Array.isArray(value) ? '[' : '{'} {entries.length} {entries.length === 1 ? 'item' : 'items'} {Array.isArray(value) ? ']' : '}'}</span>
+      </summary>
+      <div className="ml-5 border-l border-slate-800 pl-3">
+        {entries.map(([key, item]) => <JsonValue key={key} name={key} value={item} depth={depth + 1} />)}
+      </div>
+    </details>
+  );
+};
 
 const getPlaceholderForField = (fieldName, labelText) => {
   const name = (fieldName || '').toLowerCase();
@@ -24,6 +56,7 @@ export default function VerificationPlayground({
   setPlaygroundInputs,
   playLoading,
   playResponse,
+  playMeta,
   handleVerifyPlayground,
   handleActivateService,
   user
@@ -35,6 +68,15 @@ export default function VerificationPlayground({
   const roleKey = String(user?.role || '').toUpperCase().replace(/[\s-]+/g, '_');
   const isAdmin = user?.isAdmin || roleKey === 'SUPER_ADMIN' || roleKey === 'ADMIN';
   const selectedService = servicesList.find(s => s.key === verifyService) || servicesList[0];
+  const auditServices = servicesList.filter(s => AUDIT_KEYS.includes(s.key));
+  const responseJson = playResponse ? JSON.stringify(playResponse, null, 2) : '';
+  const responseSucceeded = playMeta?.status === 'success' || playResponse?.success === true;
+
+  const handleCopyResponse = async () => {
+    if (!responseJson) return;
+    await navigator.clipboard.writeText(responseJson);
+    toast.success('Response JSON copied');
+  };
 
   const categories = [
     { id: 'all', label: 'All Categories' },
@@ -83,7 +125,7 @@ export default function VerificationPlayground({
                   onClick={() => setSelectedCategory(c.id)}
                   className={`px-4 py-2 rounded-full text-xs font-bold font-display border transition-all shrink-0 ${
                     selectedCategory === c.id
-                      ? 'bg-violet-600 text-white border-transparent shadow-sm'
+                      ? 'bg-emerald-600 text-white border-transparent shadow-sm'
                       : 'bg-white border-slate-200 text-slate-600 hover:text-slate-900 shadow-sm'
                   }`}
                 >
@@ -112,13 +154,13 @@ export default function VerificationPlayground({
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
               {filteredServices.map((svc) => (
-                <ClayCard key={svc.id} className="cv-card flex flex-col justify-between gap-5 hover:border-violet-300 bg-white shadow-sm border border-slate-200 p-6 rounded-[24px]">
+                <ClayCard key={svc.id} className="cv-card flex flex-col justify-between gap-5 hover:border-emerald-300 bg-white shadow-sm border border-slate-200 p-6 rounded-[24px]">
                   <div className="text-left flex flex-col gap-3">
                     <div className="flex justify-between items-start">
                       <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
                         {svc.category}
                       </span>
-                      <span className="text-[9px] font-bold bg-violet-100 text-violet-700 px-2 py-0.5 rounded font-mono">
+                      <span className="text-[9px] font-bold bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded font-mono">
                         {svc.method}
                       </span>
                     </div>
@@ -135,7 +177,7 @@ export default function VerificationPlayground({
                       </div>
                       <div className="flex justify-between items-center">
                         <span className="text-slate-400 font-semibold">Cost Per API:</span>
-                        <strong className="text-violet-750 font-extrabold text-sm">{svc.price}</strong>
+                        <strong className="text-emerald-700 font-extrabold text-sm">{svc.price}</strong>
                       </div>
                     </div>
 
@@ -156,15 +198,15 @@ export default function VerificationPlayground({
                               setVerifyService(svc.key);
                               setActiveSubTab('sandbox');
                             }}
-                            className="py-2 px-4 text-xs font-bold border border-violet-200 bg-violet-50 text-violet-700 hover:bg-violet-100 flex items-center gap-1 shrink-0"
+                            className="py-2 px-4 text-xs font-bold border border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 flex items-center gap-1 shrink-0"
                           >
-                            <Play className="w-3.5 h-3.5 fill-violet-750" /> Try
+                            <Play className="w-3.5 h-3.5 fill-emerald-700" /> Try
                           </ClayButton>
                         </div>
                       ) : (
                         <button
                           onClick={() => handleActivateService(svc.id)}
-                          className="w-full py-2.5 text-center text-xs font-bold text-white bg-violet-600 hover:bg-violet-750 rounded-xl shadow-md shadow-violet-500/10 transition-all hover:scale-[1.02] flex items-center justify-center gap-1.5 outline-none"
+                          className="w-full py-2.5 text-center text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 rounded-xl shadow-md shadow-emerald-500/10 transition-all hover:scale-[1.02] flex items-center justify-center gap-1.5 outline-none"
                         >
                           <Lock className="w-3.5 h-3.5" /> Unlock & Activate
                         </button>
@@ -187,6 +229,21 @@ export default function VerificationPlayground({
                 <h3 className="text-lg font-bold font-display text-slate-900 mb-4">Verification Sandbox</h3>
                 
                 <label className="block text-xs font-semibold text-slate-600 mb-2 font-display ml-1">Target Service API</label>
+                {isAdmin && auditServices.length > 0 && (
+                  <div className="mb-4 rounded-2xl border border-emerald-100 bg-emerald-50/60 p-3">
+                    <div className="text-[10px] font-black uppercase tracking-wider text-emerald-700">Admin Sandbox Test Matrix</div>
+                    <div className="mt-2 flex flex-wrap gap-1.5">
+                      {AUDIT_KEYS.map(key => {
+                        const found = servicesList.some(s => s.key === key);
+                        return (
+                          <span key={key} className={`rounded-full border px-2 py-1 text-[9px] font-black ${found ? 'border-emerald-200 bg-white text-emerald-700' : 'border-red-200 bg-red-50 text-red-700'}`}>
+                            {key}: {found ? 'PASS' : 'Missing'}
+                          </span>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 mb-6 max-h-[160px] overflow-y-auto p-1 border border-slate-100 rounded-2xl">
                   {servicesList.map((service) => (
                     <button
@@ -195,7 +252,7 @@ export default function VerificationPlayground({
                       onClick={() => setVerifyService(service.key)}
                       className={`py-2 px-1 rounded-2xl text-[10px] font-bold font-display border transition-all duration-200 truncate ${
                         verifyService === service.key
-                          ? 'bg-violet-600 text-white border-transparent shadow-sm'
+                          ? 'bg-emerald-600 text-white border-transparent shadow-sm'
                           : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100'
                       }`}
                       title={service.name}
@@ -229,13 +286,13 @@ export default function VerificationPlayground({
                       </div>
                       <div className="flex justify-between items-center">
                         <span className="font-semibold text-slate-500">Per API Request:</span>
-                        <strong className="text-violet-750 font-extrabold text-sm">{selectedService.price}</strong>
+                        <strong className="text-emerald-700 font-extrabold text-sm">{selectedService.price}</strong>
                       </div>
                     </div>
                     <ClayButton
                       variant="primary"
                       onClick={() => handleActivateService(selectedService.id)}
-                      className="w-full py-3 text-xs font-bold bg-violet-600 text-white hover:bg-violet-750 flex items-center justify-center gap-2"
+                      className="w-full py-3 text-xs font-bold bg-emerald-600 text-white hover:bg-emerald-700 flex items-center justify-center gap-2"
                     >
                       Unlock & Activate Service
                     </ClayButton>
@@ -276,37 +333,45 @@ export default function VerificationPlayground({
 
           {/* Right Column: Console Output */}
           <div className="lg:col-span-7 flex flex-col gap-4 w-full">
-            <div className="bg-[#090E1A] border border-[#1e293b] shadow-xl rounded-[24px] p-6 min-h-[400px] flex-1 flex flex-col justify-between font-mono text-xs text-left">
-              <div className="flex justify-between items-center pb-4 border-b border-[#1e293b] mb-4">
-                <span className="text-[10px] uppercase text-[#94a3b8] font-sans font-bold">Raw JSON response payload</span>
-                <div className="flex gap-1">
-                  <span className="w-2.5 h-2.5 rounded-full bg-red-500/75" />
-                  <span className="w-2.5 h-2.5 rounded-full bg-yellow-500/75" />
-                  <span className="w-2.5 h-2.5 rounded-full bg-green-500/75" />
+            <div className="bg-[#090E1A] border border-[#1e293b] shadow-xl rounded-[24px] p-5 sm:p-6 min-h-[400px] flex-1 flex flex-col justify-between font-mono text-xs text-left">
+              <div className="flex flex-col gap-3 pb-4 border-b border-[#1e293b] mb-4 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <span className="text-[10px] uppercase text-[#94a3b8] font-sans font-bold">Response viewer</span>
+                  {playMeta?.timestamp && <div className="mt-1 font-sans text-[10px] text-slate-500">{new Date(playMeta.timestamp).toLocaleString()}</div>}
+                </div>
+                <div className="flex flex-wrap items-center gap-2 font-sans">
+                  {playResponse && (
+                    <span className={`rounded-full border px-2.5 py-1 text-[10px] font-black uppercase ${responseSucceeded ? 'border-emerald-500/30 bg-emerald-500/10 text-emerald-300' : 'border-red-500/30 bg-red-500/10 text-red-300'}` }>
+                      {responseSucceeded ? 'Success' : 'Failed'}
+                    </span>
+                  )}
+                  {playMeta?.provider && <span className="rounded-full border border-sky-500/30 bg-sky-500/10 px-2.5 py-1 text-[10px] font-black uppercase text-sky-300">{playMeta.provider}</span>}
+                  <button type="button" onClick={handleCopyResponse} disabled={!playResponse} className="inline-flex items-center gap-1.5 rounded-full border border-slate-700 px-3 py-1.5 text-[10px] font-black uppercase text-slate-300 transition hover:border-emerald-400 hover:text-emerald-300 disabled:cursor-not-allowed disabled:opacity-40">
+                    <Copy className="h-3 w-3" /> Copy JSON
+                  </button>
                 </div>
               </div>
 
-              <div className="flex-1 select-text overflow-y-auto max-h-[350px]">
+              <div className="flex-1 select-text overflow-y-auto max-h-[350px] rounded-2xl border border-slate-800/70 bg-slate-950/40 p-4">
                 {playLoading ? (
                   <div className="h-full flex flex-col items-center justify-center font-sans text-[#94a3b8] py-20">
-                    <div className="w-6 h-6 border-2 border-violet-500 border-t-transparent rounded-full animate-spin mb-2" />
+                    <div className="w-6 h-6 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin mb-2" />
                     <span>{selectedService?.method || 'POST'} {selectedService?.endpoint || ''} ...</span>
                   </div>
                 ) : playResponse ? (
-                  <pre className="text-[#36FFA1] leading-relaxed">
-                    {JSON.stringify(playResponse, null, 2)}
-                  </pre>
+                  <JsonValue value={playResponse} />
                 ) : (
                   <div className="h-full flex flex-col items-center justify-center font-sans text-[#94a3b8] text-center py-20">
-                    <span>⚡ API gateway response will be outputted here.</span>
+                    <span>API gateway response will appear here after execution.</span>
                   </div>
                 )}
               </div>
 
               {playResponse && (
-                <div className="mt-4 pt-4 border-t border-[#1e293b] font-sans flex justify-between items-center text-[10px] text-[#94a3b8]">
-                  <span>Latency: <strong className="text-white">{playResponse.latencyMs || '--'}ms</strong></span>
-                  <span>Provider Node: <strong className="text-violet-400">{playResponse.provider || 'mock'}</strong></span>
+                <div className="mt-4 pt-4 border-t border-[#1e293b] font-sans grid grid-cols-1 gap-2 text-[10px] text-[#94a3b8] sm:grid-cols-3">
+                  <span>Duration: <strong className="text-white">{playMeta?.durationMs || playResponse.latencyMs || '--'}ms</strong></span>
+                  <span>Provider: <strong className="text-emerald-400">{playMeta?.provider || playResponse.provider || 'gateway'}</strong></span>
+                  <span>Service: <strong className="text-white">{playMeta?.serviceKey || selectedService?.key || '--'}</strong></span>
                 </div>
               )}
             </div>

@@ -167,6 +167,7 @@ class ProfileController {
       const userId = req.user.id;
       const name = String(req.body.name || '').trim();
       const email = String(req.body.email || '').trim().toLowerCase();
+      const cleanPhone = String(req.body.phone || '').replace(/\D/g, '');
 
       if (!name || name.length < 2) {
         return res.status(400).json({ success: false, message: 'Name must be at least 2 characters.' });
@@ -189,14 +190,33 @@ class ProfileController {
         return res.status(409).json({ success: false, message: 'Email address already exists.' });
       }
 
+      if (!/^\d{10}$/.test(cleanPhone)) {
+        return res.status(400).json({ success: false, message: 'Please enter a valid 10-digit mobile number.' });
+      }
+
+      const existingPhone = await prisma.user.findFirst({
+        where: {
+          phone: cleanPhone,
+          id: { not: userId },
+          deletedAt: null
+        },
+        select: { id: true }
+      });
+
+      if (existingPhone) {
+        return res.status(409).json({ success: false, message: 'Phone number already exists' });
+      }
+
       const updatedUser = await prisma.user.update({
         where: { id: userId },
-        data: { name, email },
+        data: { name, email, phone: cleanPhone, phoneNumber: cleanPhone, phoneVerified: true },
         select: {
           id: true,
           name: true,
           email: true,
           phone: true,
+          phoneNumber: true,
+          phoneVerified: true,
           status: true,
           verified: true,
           role: { select: { name: true } },
@@ -215,7 +235,7 @@ class ProfileController {
           action: 'USER_PROFILE_UPDATED',
           entityName: 'users',
           entityId: String(userId),
-          newValues: { name, email }
+          newValues: { name, email, phone: cleanPhone }
         }
       });
 
@@ -227,6 +247,8 @@ class ProfileController {
           name: updatedUser.name,
           email: updatedUser.email,
           phone: updatedUser.phone,
+          phoneNumber: updatedUser.phoneNumber,
+          phoneVerified: updatedUser.phoneVerified,
           status: updatedUser.status,
           verified: updatedUser.verified,
           role: updatedUser.role?.name || 'User',
