@@ -1,0 +1,1 @@
+module.exports.verify = async (provider, body) => provider.execute('DRIVING_LICENSE_VERIFY', { DLNo: (body.dl_no || body.dl || body.license_no || '').toUpperCase().trim(), DOB: body.dob || body.date_of_birth });

@@ -116,6 +116,15 @@ class ApiGatewayController {
       return res.status(404).json({ success: false, message: `Requested verification service ${serviceType} does not exist.` });
     }
 
+    const validationError = ApiGatewayController.validateInput(serviceType, combinedPayload);
+    if (validationError) {
+      return res.status(400).json({
+        success: false,
+        status: 'FAILED',
+        message: validationError,
+        error: { code: 'INVALID_INPUT', message: validationError }
+      });
+    }
     const roleName = user.role?.name || req.role || user.role || '';
     const roleKey = String(roleName).toUpperCase().replace(/[\s-]+/g, '_');
     const isUserAdmin = user.isAdmin || roleKey === 'SUPER_ADMIN' || roleKey === 'ADMIN';
@@ -282,6 +291,11 @@ class ApiGatewayController {
         return res.status(502).json({
           success: false,
           requestId: requestLog.id,
+          transactionId: requestLog.id,
+          service: serviceType,
+          latency: 0,
+          status: 'FAILED',
+          message: 'All verification providers returned errors. Charges have been refunded to your wallet.',
           error: {
             code: 'PROVIDER_FAILURE',
             message: 'All verification providers returned errors. Charges have been refunded to your wallet.',
@@ -319,9 +333,14 @@ class ApiGatewayController {
       return res.status(200).json({
         success: true,
         requestId: requestLog.id,
+        transactionId: requestLog.id,
         serviceType,
+        service: serviceType,
         latencyMs: providerResponse.latency,
+        latency: providerResponse.latency,
         provider: selectedProvider.code,
+        status: 'SUCCESS',
+        message: providerResponse.data?.message || 'Verification successful.',
         data: providerResponse.data
       });
     } catch (error) {
@@ -362,9 +381,92 @@ class ApiGatewayController {
     }
   }
 
+  static validateInput(serviceType, payload) {
+    const type = String(serviceType || '').toUpperCase();
+    const value = (...keys) => keys.map(key => payload[key]).find(v => v !== undefined && v !== null && String(v).trim() !== '');
+    const clean = (...keys) => String(value(...keys) || '').trim();
+    const upper = (...keys) => clean(...keys).toUpperCase();
+
+    const patterns = {
+      gstin: /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z][1-9A-Z]Z[0-9A-Z]$/,
+      pan: /^[A-Z]{5}[0-9]{4}[A-Z]$/,
+      vehicle: /^[A-Z]{2}[0-9]{1,2}[A-Z]{0,3}[0-9]{4}$/,
+      mobile: /^[6-9][0-9]{9}$/,
+      ifsc: /^[A-Z]{4}0[A-Z0-9]{6}$/,
+      upi: /^[a-zA-Z0-9._-]{2,256}@[a-zA-Z][a-zA-Z0-9.-]{2,64}$/,
+      passport: /^[A-Z][0-9]{7}$/,
+      date: /^\d{4}-\d{2}-\d{2}$/,
+      epic: /^[A-Z]{3}[0-9]{7}$/
+    };
+
+    if (['GST_VERIFY', 'GST_RETURN'].includes(type)) {
+      if (!patterns.gstin.test(upper('gst', 'gstin'))) return 'GSTIN must be a valid 15-character GST number.';
+    }
+    if (['RC_VERIFY', 'RC_LITE', 'RC_TO_MOBILE', 'VEHICLE_CHALLAN'].includes(type)) {
+      if (!patterns.vehicle.test(upper('vehicle_no', 'vehicle', 'rc_no'))) return 'Vehicle number must be a valid Indian registration number.';
+    }
+    if (type === 'MOBILE_TO_RC') {
+      if (!patterns.mobile.test(clean('mobile_no', 'mobile'))) return 'Mobile number must be a valid 10-digit Indian mobile number.';
+    }
+    if (type === 'BANK_VERIFY') {
+      if (!clean('account_no', 'account')) return 'Bank account number is required.';
+      if (!patterns.ifsc.test(upper('ifsc'))) return 'IFSC must be a valid IFSC code.';
+    }
+    if (type === 'UPI_VERIFY') {
+      if (!patterns.upi.test(clean('upi_id', 'vpa', 'upi'))) return 'UPI ID must be a valid VPA format.';
+    }
+    if (type === 'PASSPORT_VERIFY') {
+      if (!patterns.passport.test(upper('passport_no', 'passport'))) return 'Passport number must be valid.';
+      if (!clean('file_no', 'fileNumber')) return 'Passport file number is required.';
+      if (!patterns.date.test(clean('dob', 'date_of_birth'))) return 'Passport DOB must use YYYY-MM-DD format.';
+    }
+    if (type === 'DRIVING_LICENSE_VERIFY') {
+      if (clean('dl_no', 'dl', 'license_no').length < 6) return 'Driving licence number is required.';
+      if (!patterns.date.test(clean('dob', 'date_of_birth'))) return 'Driving licence DOB must use YYYY-MM-DD format.';
+    }
+    if (type === 'VOTER_ID_VERIFY') {
+      if (!patterns.epic.test(upper('epic', 'voter_id', 'voter'))) return 'EPIC must match ABC1234567 format.';
+    }
+    if (type === 'MCA_COMPANY_SEARCH') {
+      if (clean('cin', 'company_name', 'company').length < 3) return 'Company name or CIN must be at least 3 characters.';
+    }
+    if (type === 'PAN_TO_GST' || type === 'AADHAAR_PAN' || type === 'AADHAAR_TO_PAN') {
+      const pan = upper('pan', 'pan_no', 'pan_number');
+      if (pan && !patterns.pan.test(pan)) return 'PAN must match ABCDE1234F format.';
+    }
+
+    return null;
+  }
   static async callProviderAdapter(providerInstance, serviceType, body) {
     const type = serviceType.toUpperCase();
     
+    if (providerInstance.code === 'planapi') {
+      const planApiMapping = {
+        GST_VERIFY: 'gst',
+        GST_RETURN: 'gstReturn',
+        RC_VERIFY: 'rc',
+        RC_LITE: 'rcLite',
+        RC_TO_MOBILE: 'rcMobile',
+        MOBILE_TO_RC: 'mobileRc',
+        VEHICLE_CHALLAN: 'challan',
+        DRIVING_LICENSE_VERIFY: 'dl',
+        PASSPORT_VERIFY: 'passport',
+        VOTER_ID_VERIFY: 'voter',
+        MCA_COMPANY_SEARCH: 'mca',
+        BANK_VERIFY: 'bank',
+        UPI_VERIFY: 'upi'
+      };
+      const planModule = planApiMapping[type];
+      if (planModule) {
+        try {
+          const adapter = require(`../providers/planapi/${planModule}`);
+          return await adapter.verify(providerInstance, body);
+        } catch (err) {
+          logger.error(`Failed to load or execute PLANAPI adapter for ${type}: ${err.message}`);
+          throw err;
+        }
+      }
+    }
     // Map serviceType to specific provider adapter files
     const fileMapping = {
       'PAN': 'pan',

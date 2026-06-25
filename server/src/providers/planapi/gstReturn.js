@@ -1,0 +1,1 @@
+module.exports.verify = async (provider, body) => provider.execute('GST_RETURN', { GSTIN: (body.gst || body.gstin || '').toUpperCase().trim(), FinancialYear: body.financial_year || body.financialYear || body.year });

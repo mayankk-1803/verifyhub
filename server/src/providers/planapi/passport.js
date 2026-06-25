@@ -1,0 +1,1 @@
+module.exports.verify = async (provider, body) => provider.execute('PASSPORT_VERIFY', { PassportNo: (body.passport_no || body.passport || '').toUpperCase().trim(), FileNo: (body.file_no || body.fileNumber || '').toUpperCase().trim(), DOB: body.dob || body.date_of_birth, Name: body.name });

@@ -2,13 +2,15 @@ const SurepassProvider = require('./SurepassProvider');
 const SignzyProvider = require('./SignzyProvider');
 const KarzaProvider = require('./KarzaProvider');
 const DigitapProvider = require('./DigitapProvider');
+const PlanApiProvider = require('./PlanApiProvider');
 const logger = require('../config/logger');
 
 const providersMap = {
   surepass: SurepassProvider,
   signzy: SignzyProvider,
   karza: KarzaProvider,
-  digitap: DigitapProvider
+  digitap: DigitapProvider,
+  planapi: PlanApiProvider
 };
 
 /**

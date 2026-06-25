@@ -142,12 +142,29 @@ async function seedDatabase() {
         create: p
       });
     }
+
+    const planApiProvider = await prisma.provider.upsert({
+      where: { code: 'planapi' },
+      update: {
+        name: 'PLANAPI',
+        activeStatus: true,
+        apiBaseUrl: process.env.PLANAPI_BASE_URL || 'https://planapi.in',
+        credentials: {}
+      },
+      create: {
+        name: 'PLANAPI',
+        code: 'planapi',
+        activeStatus: true,
+        apiBaseUrl: process.env.PLANAPI_BASE_URL || 'https://planapi.in',
+        credentials: {}
+      }
+    });
     logger.info('Verification providers seeded.');
 
     // 6. Clean and Seed Provider Routing via Upsert to avoid foreign key errors
     logger.info('Syncing provider routes...');
     const routesToCreate = [
-      { serviceType: 'GST_VERIFY', primaryProviderId: 1, backupProviderId: 3, activeStatus: true },
+      { serviceType: 'GST_VERIFY', primaryProviderId: planApiProvider.id, backupProviderId: 3, activeStatus: true },
       { serviceType: 'PAN_CARD', primaryProviderId: 1, backupProviderId: 2, activeStatus: true },
       { serviceType: 'PAN_BASIC', primaryProviderId: 1, backupProviderId: 2, activeStatus: true },
       { serviceType: 'PAN_VERIFICATION', primaryProviderId: 1, backupProviderId: 2, activeStatus: true },
@@ -159,19 +176,19 @@ async function seedDatabase() {
       { serviceType: 'RATION', primaryProviderId: 2, backupProviderId: 4, activeStatus: true },
       { serviceType: 'VOTER_VERIFY', primaryProviderId: 2, backupProviderId: 3, activeStatus: true },
       
-      { serviceType: 'GST_RETURN', primaryProviderId: 1, backupProviderId: 3, activeStatus: true },
-      { serviceType: 'RC_VERIFY', primaryProviderId: 1, backupProviderId: 2, activeStatus: true },
-      { serviceType: 'VOTER_ID_VERIFY', primaryProviderId: 2, backupProviderId: 3, activeStatus: true },
-      { serviceType: 'PASSPORT_VERIFY', primaryProviderId: 1, backupProviderId: 4, activeStatus: true },
-      { serviceType: 'DRIVING_LICENSE_VERIFY', primaryProviderId: 1, backupProviderId: 2, activeStatus: true },
-      { serviceType: 'MCA_COMPANY_SEARCH', primaryProviderId: 3, backupProviderId: 4, activeStatus: true },
-      { serviceType: 'BANK_VERIFY', primaryProviderId: 2, backupProviderId: 4, activeStatus: true },
-      { serviceType: 'UPI_VERIFY', primaryProviderId: 1, backupProviderId: 2, activeStatus: true },
-      { serviceType: 'VEHICLE_CHALLAN', primaryProviderId: 1, backupProviderId: 3, activeStatus: true },
+      { serviceType: 'GST_RETURN', primaryProviderId: planApiProvider.id, backupProviderId: 3, activeStatus: true },
+      { serviceType: 'RC_VERIFY', primaryProviderId: planApiProvider.id, backupProviderId: 2, activeStatus: true },
+      { serviceType: 'VOTER_ID_VERIFY', primaryProviderId: planApiProvider.id, backupProviderId: 3, activeStatus: true },
+      { serviceType: 'PASSPORT_VERIFY', primaryProviderId: planApiProvider.id, backupProviderId: 4, activeStatus: true },
+      { serviceType: 'DRIVING_LICENSE_VERIFY', primaryProviderId: planApiProvider.id, backupProviderId: 2, activeStatus: true },
+      { serviceType: 'MCA_COMPANY_SEARCH', primaryProviderId: planApiProvider.id, backupProviderId: 4, activeStatus: true },
+      { serviceType: 'BANK_VERIFY', primaryProviderId: planApiProvider.id, backupProviderId: 4, activeStatus: true },
+      { serviceType: 'UPI_VERIFY', primaryProviderId: planApiProvider.id, backupProviderId: 2, activeStatus: true },
+      { serviceType: 'VEHICLE_CHALLAN', primaryProviderId: planApiProvider.id, backupProviderId: 3, activeStatus: true },
       { serviceType: 'RC_ADVANCED', primaryProviderId: 1, backupProviderId: 2, activeStatus: true },
-      { serviceType: 'RC_TO_MOBILE', primaryProviderId: 1, backupProviderId: 3, activeStatus: true },
-      { serviceType: 'MOBILE_TO_RC', primaryProviderId: 1, backupProviderId: 4, activeStatus: true },
-      { serviceType: 'RC_LITE', primaryProviderId: 1, backupProviderId: 2, activeStatus: true },
+      { serviceType: 'RC_TO_MOBILE', primaryProviderId: planApiProvider.id, backupProviderId: 3, activeStatus: true },
+      { serviceType: 'MOBILE_TO_RC', primaryProviderId: planApiProvider.id, backupProviderId: 4, activeStatus: true },
+      { serviceType: 'RC_LITE', primaryProviderId: planApiProvider.id, backupProviderId: 2, activeStatus: true },
       { serviceType: 'AADHAAR_TO_PAN', primaryProviderId: 1, backupProviderId: 4, activeStatus: true },
       { serviceType: 'MOBILE_TO_PAN', primaryProviderId: 1, backupProviderId: 3, activeStatus: true }
     ];
